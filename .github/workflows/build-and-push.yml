@@ -21,8 +21,26 @@ jobs:
             username: ${{ secrets.REGISTRY_USERNAME }}
             password: ${{ secrets.REGISTRY_PASSWORD }}
           
-        - name: 'Build and push image'
+        - name: 'PetStore APP Build and push image'
           working-directory: ./petstoreapp
           run: |
             docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreapp:${{ github.sha }}
             docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreapp:${{ github.sha }}
+
+        - name: 'PetStore OrderService Build and push image'
+          working-directory: ./petstoreorderservice
+          run: |
+            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:${{ github.sha }}
+            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:${{ github.sha }}
+
+        - name: 'PetStore OrderService Build and push image'
+          working-directory: ./petstorepetservice
+          run: |
+            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:${{ github.sha }}
+            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:${{ github.sha }}
+
+        - name: 'PetStore OrderService Build and push image'
+          working-directory: ./petstoreproductservice
+          run: |
+            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreproductservice:${{ github.sha }}
+            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreproductservice:${{ github.sha }}
