@@ -24,23 +24,23 @@ jobs:
         - name: 'PetStore APP Build and push image'
           working-directory: ./petstoreapp
           run: |
-            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreapp:${{ github.sha }}
-            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreapp:${{ github.sha }}
+            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreapp:build-${{ github.job }}
+            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreapp:build-${{ github.job }}
 
         - name: 'PetStore OrderService Build and push image'
           working-directory: ./petstoreorderservice
           run: |
-            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:${{ github.sha }}
-            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:${{ github.sha }}
+            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:build-${{ github.job }}
+            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:build-${{ github.job }}
 
         - name: 'PetStore OrderService Build and push image'
           working-directory: ./petstorepetservice
           run: |
-            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:${{ github.sha }}
-            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:${{ github.sha }}
+            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:build-${{ github.job }}
+            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:build-${{ github.job }}
 
         - name: 'PetStore OrderService Build and push image'
           working-directory: ./petstoreproductservice
           run: |
-            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreproductservice:${{ github.sha }}
-            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreproductservice:${{ github.sha }}
+            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreproductservice:build-${{ github.job }}
+            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreproductservice:build-${{ github.job }}
