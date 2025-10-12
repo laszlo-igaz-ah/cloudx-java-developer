@@ -6,6 +6,10 @@ You can use this image to run terraform commands without having to install anyth
 
 **Don't forget to mount the terraform folder into the running container**
 
+```bash
+docker run -it -v ./terraform:/tmp/terraform cloudx-terraform bash
+```
+
 1. Use `az login --use-device-code` to login to your azure account. (there won't be a browser in the container)
 2. Select the right subscription after login or use `az account set --subscription "<your-subscription-id>"` to set the subscription you want to use.
 3. Run terraform commands

@@ -9,7 +9,7 @@ resource "azurerm_service_plan" "app_plan_services" {
   resource_group_name = var.app_plan_resource_group_name
   location            = var.app_plan_web_services_location
   os_type             = "Linux"
-  sku_name            = "S3"
+  sku_name            = "S2"
 }
 
 resource "azurerm_monitor_autoscale_setting" "autoscale_app_plan_service" {
@@ -36,7 +36,8 @@ resource "azurerm_monitor_autoscale_setting" "autoscale_app_plan_service" {
         time_window        = "PT1M"
         time_aggregation   = "Average"
         operator           = "GreaterThan"
-        threshold          = 70
+        threshold          = 15 # For testing
+        # threshold          = 70
       }
 
       scale_action {
@@ -56,7 +57,8 @@ resource "azurerm_monitor_autoscale_setting" "autoscale_app_plan_service" {
         time_window        = "PT1M"
         time_aggregation   = "Average"
         operator           = "LessThan"
-        threshold          = 20
+        threshold          = 10 # For testing
+        # threshold          = 20
       }
 
       scale_action {
