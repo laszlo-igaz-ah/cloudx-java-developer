@@ -33,13 +33,13 @@ jobs:
             docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:build-${{ github.run_number }}
             docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:build-${{ github.run_number }}
 
-        - name: 'PetStore OrderService Build and push image'
+        - name: 'PetStore PetService Build and push image'
           working-directory: ./petstorepetservice
           run: |
             docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:build-${{ github.run_number }}
             docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:build-${{ github.run_number }}
 
-        - name: 'PetStore OrderService Build and push image'
+        - name: 'PetStore ProductService Build and push image'
           working-directory: ./petstoreproductservice
           run: |
             docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreproductservice:build-${{ github.run_number }}
