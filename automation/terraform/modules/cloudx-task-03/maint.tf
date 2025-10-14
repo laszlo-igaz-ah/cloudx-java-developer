@@ -168,7 +168,7 @@ resource "azurerm_linux_web_app_slot" "slot_app_plan_web_primary" {
     container_registry_use_managed_identity       = true
     container_registry_managed_identity_client_id = var.acr_managed_identity_client_id
     application_stack {
-      docker_image_name   = "${var.app_web_docker_image_name}:build-10"
+      docker_image_name   = "${var.app_web_docker_image_name}:build-14"
       docker_registry_url = "https://${var.acr_name}.azurecr.io"
     }
   }

@@ -24,6 +24,15 @@ az ad sp create-for-rbac --name "<your-service-principal-name>" --role="Contribu
 
 Replace `<your-service-principal-name>` with a name for your service principal and `<your-subscription-id>` with your Azure subscription ID. This command will output the `appId`, `password`, `tenant`, and other details needed for authentication.
 
+The result JSON will contain several fields which needs to be set as environment variables for terraform to be able to authenticate:
+
+```bash
+export ARM_CLIENT_ID="<appId>"
+export ARM_CLIENT_SECRET="<password>"
+export ARM_SUBSCRIPTION_ID="<id>"
+export ARM_TENANT_ID="<tenant>"
+```
+
 2. This service principal needs an extra Role to be able to create Role Assignments. It can be done on the portal
    1. Select the subscription
    2. Go to Access Control (IAM)
