@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "4.47.0"
+      version = "4.49.0"
     }
   }
 
@@ -32,6 +32,21 @@ module "temporary_resources" {
   temporary_rg_name  = var.temporary_rg_name
 }
 
+module "cloudx_task_04" {
+  source = "./modules/cloudx-task-04"
+
+  container_app_location       = var.temporary_location
+  container_app_rg_name        = var.temporary_rg_name
+  container_app_env_name       = var.container_app_env_name
+  log_analytics_workspace_name = var.log_analytics_workspace_name
+  container_app_name_prefix    = var.container_app_name_prefix
+  acr_name                     = var.permanent_acr_name
+  acr_managed_identity_id      = module.permanent_resources.managed_identity_id
+  docker_image_tag             = "build-14"
+}
+
+/*
+Excluding the module because this task is completed
 module "cloudx_task_03" {
   source = "./modules/cloudx-task-03"
 
@@ -48,3 +63,5 @@ module "cloudx_task_03" {
   app_plan_web_services_name        = var.app_plan_web_services_name
   app_plan_web_services_location    = var.app_plan_web_services_location
 }
+
+*/

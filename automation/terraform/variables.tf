@@ -34,6 +34,10 @@ variable "temporary_rg_name" {
   description = "Name of the temporary Resource Group."
 }
 
+/**
+Variables for CloudX Task 03
+ */
+
 variable "app_plan_web_services_location" {
   type        = string
   default     = "eastus"
@@ -68,4 +72,26 @@ variable "app_plan_web_secondary_name" {
   type        = string
   default     = "app-plan-web-secondary"
   description = "Name of the secondary App Service Plan for Web App."
+}
+
+/**
+Variables for CloudX Task 04
+ */
+
+variable "container_app_env_name" {
+  type        = string
+  default     = "igazl-cloudx-container-app-env"
+  description = "The name of the Container App Environment."
+}
+
+variable "log_analytics_workspace_name" {
+  type        = string
+  default     = "igazl-cloudx-log-analytics"
+  description = "The name of the Log Analytics Workspace."
+}
+
+variable "container_app_name_prefix" {
+  type        = string
+  default     = "igazl"
+  description = "Prefix for the Container App names."
 }
