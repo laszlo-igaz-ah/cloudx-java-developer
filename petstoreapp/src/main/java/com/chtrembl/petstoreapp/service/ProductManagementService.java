@@ -21,6 +21,7 @@ import static com.chtrembl.petstoreapp.config.Constants.OPERATION;
 import static com.chtrembl.petstoreapp.config.Constants.REQUEST_ID;
 import static com.chtrembl.petstoreapp.config.Constants.TRACE_ID;
 import static com.chtrembl.petstoreapp.model.Status.AVAILABLE;
+import static com.microsoft.applicationinsights.telemetry.SeverityLevel.Information;
 
 @Service
 @RequiredArgsConstructor
@@ -80,6 +81,22 @@ public class ProductManagementService {
                     createFilteredEventProperties(category, tags, requestId, traceId, products.size()),
                     createEventMetrics(products.size())
             );
+
+            // Custom Metric: Track the number of products returned to the user
+            int returnedProductCount = products.size();
+
+            // Use trackTrace for Application Insights
+            String traceMessage = String.format(
+                    "Returning %d products to user %s [RequestID: %s, TraceID: %s, Category: %s, Tags: %s]",
+                    returnedProductCount, this.sessionUser.getName(), requestId, traceId, category, tags);
+
+            this.sessionUser.getTelemetryClient().trackTrace(
+                    traceMessage,
+                    Information,
+                    createMetricProperties(category, tags, requestId, traceId)
+            );
+
+            this.sessionUser.getTelemetryClient().trackMetric("ProductsReturnedToUser", returnedProductCount);
 
             return products;
         } catch (FeignException fe) {
@@ -158,5 +175,17 @@ public class ProductManagementService {
         Map<String, Double> metrics = new java.util.HashMap<>();
         metrics.put("productCount", (double) count);
         return metrics;
+    }
+
+    private Map<String, String> createMetricProperties(String category, List<Tag> tags,
+                                                        String requestId, String traceId) {
+        Map<String, String> properties = new java.util.HashMap<>();
+        properties.put("category", category);
+        properties.put("tags", tags.toString());
+        properties.put("requestId", requestId);
+        properties.put("traceId", traceId);
+        properties.put("userName", this.sessionUser.getName());
+        properties.put("containerHost", this.containerEnvironment.getContainerHostName());
+        return properties;
     }
 }
