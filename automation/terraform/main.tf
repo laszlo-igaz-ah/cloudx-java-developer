@@ -44,7 +44,7 @@ module "cloudx_task_05" {
   acr_managed_identity_principal_id = module.permanent_resources.managed_identity_principal_id
   acr_managed_identity_client_id    = module.permanent_resources.managed_identity_client_id
   acr_managed_identity_id           = module.permanent_resources.managed_identity_id
-  docker_image_tag                  = "build-14"
+  docker_image_tag                  = "build-23"
   app_plan_web_services_name        = var.app_plan_web_services_name
   app_plan_web_services_location    = var.app_plan_web_services_location
 }
