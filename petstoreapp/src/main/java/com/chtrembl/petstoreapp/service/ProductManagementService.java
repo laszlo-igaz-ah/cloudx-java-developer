@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import static com.chtrembl.petstoreapp.config.Constants.CATEGORY;
 import static com.chtrembl.petstoreapp.config.Constants.OPERATION;
@@ -51,6 +52,13 @@ public class ProductManagementService {
             products = productServiceClient.getProductsByStatus(AVAILABLE.getValue());
             this.sessionUser.setProducts(products);
 
+            // Custom Event: Product retrieval successful with metrics
+            this.sessionUser.getTelemetryClient().trackEvent(
+                    "ProductRetrievalSuccess",
+                    createEventProperties(category, tags, requestId, traceId, products.size()),
+                    createEventMetrics(products.size())
+            );
+
             if (tags.stream().anyMatch(t -> t.getName().equals("large"))) {
                 products = products.stream()
                         .filter(product -> category.equals(product.getCategory().getName())
@@ -66,12 +74,28 @@ public class ProductManagementService {
             log.info("Successfully retrieved {} products for category {} with tags {} [RequestID: {}, TraceID: {}]",
                     products.size(), category, tags, requestId, traceId);
 
+            // Custom Event: Products filtered and returned to user
+            this.sessionUser.getTelemetryClient().trackEvent(
+                    "ProductsFilteredByCategory",
+                    createFilteredEventProperties(category, tags, requestId, traceId, products.size()),
+                    createEventMetrics(products.size())
+            );
+
             return products;
         } catch (FeignException fe) {
             log.error("Feign error retrieving products [RequestID: {}, TraceID: {}, Category: {}, HTTP: {}, Message: {}]",
                     requestId, traceId, category, fe.status(), fe.getMessage(), fe);
 
+            // Custom Event: Track exception details
             this.sessionUser.getTelemetryClient().trackException(fe);
+
+            // Custom Event: Product retrieval failed
+            this.sessionUser.getTelemetryClient().trackEvent(
+                    "ProductRetrievalFailed",
+                    createErrorEventProperties(category, tags, requestId, traceId, fe.status(), fe.getMessage()),
+                    null
+            );
+
             this.sessionUser.getTelemetryClient().trackEvent(
                     String.format("PetStoreApp %s received Feign error %s (HTTP %d), container host: %s",
                             this.sessionUser.getName(),
@@ -85,5 +109,54 @@ public class ProductManagementService {
             MDC.remove(OPERATION);
             MDC.remove(CATEGORY);
         }
+    }
+
+    private Map<String, String> createEventProperties(String category, List<Tag> tags,
+                                                                  String requestId, String traceId,
+                                                                  int productCount) {
+        Map<String, String> properties = new java.util.HashMap<>();
+        properties.put("category", category);
+        properties.put("tags", tags.toString());
+        properties.put("requestId", requestId);
+        properties.put("traceId", traceId);
+        properties.put("productCount", String.valueOf(productCount));
+        properties.put("userName", this.sessionUser.getName());
+        properties.put("containerHost", this.containerEnvironment.getContainerHostName());
+        return properties;
+    }
+
+    private Map<String, String> createFilteredEventProperties(String category, List<Tag> tags,
+                                                                         String requestId, String traceId,
+                                                                         int filteredCount) {
+        Map<String, String> properties = new java.util.HashMap<>();
+        properties.put("category", category);
+        properties.put("tags", tags.toString());
+        properties.put("requestId", requestId);
+        properties.put("traceId", traceId);
+        properties.put("filteredProductCount", String.valueOf(filteredCount));
+        properties.put("userName", this.sessionUser.getName());
+        properties.put("containerHost", this.containerEnvironment.getContainerHostName());
+        return properties;
+    }
+
+    private Map<String, String> createErrorEventProperties(String category, List<Tag> tags,
+                                                                      String requestId, String traceId,
+                                                                      int httpStatus, String errorMessage) {
+        Map<String, String> properties = new java.util.HashMap<>();
+        properties.put("category", category);
+        properties.put("tags", tags.toString());
+        properties.put("requestId", requestId);
+        properties.put("traceId", traceId);
+        properties.put("httpStatus", String.valueOf(httpStatus));
+        properties.put("errorMessage", errorMessage);
+        properties.put("userName", this.sessionUser.getName());
+        properties.put("containerHost", this.containerEnvironment.getContainerHostName());
+        return properties;
+    }
+
+    private Map<String, Double> createEventMetrics(int count) {
+        Map<String, Double> metrics = new java.util.HashMap<>();
+        metrics.put("productCount", (double) count);
+        return metrics;
     }
 }
