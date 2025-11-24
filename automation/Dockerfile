@@ -32,3 +32,13 @@ RUN apt-get update && \
     apt-get clean &&  \
     rm -rf /var/lib/apt/lists/*
 
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-ubuntu-$(lsb_release -cs 2>/dev/null)-prod $(lsb_release -cs 2>/dev/null) main" > /etc/apt/sources.list.d/dotnetdev.list
+RUN apt-get update && \
+    apt-get install azure-functions-core-tools-4 && \
+    apt-get clean &&  \
+    rm -rf /var/lib/apt/lists/*
+#
+#RUN apt update -y && \
+#    apt install -y openjdk-21-jdk maven&& \
+#    apt-get clean
+
