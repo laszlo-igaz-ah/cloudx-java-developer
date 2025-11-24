@@ -41,24 +41,28 @@ resource "azurerm_linux_function_app" "function_cloudx_igazl" {
   location            = var.app_plan_web_services_location
 
   storage_account_name       = azurerm_storage_account.storage_cloudx_igazl.name
-  # storage_account_access_key = azurerm_storage_account.storage_cloudx_igazl.primary_access_key
-  storage_uses_managed_identity = true
+  storage_account_access_key = azurerm_storage_account.storage_cloudx_igazl.primary_access_key
 
   service_plan_id            = azurerm_service_plan.app_plan_web_primary.id
-
-  identity {
-    type = "UserAssigned"
-    identity_ids = [var.acr_managed_identity_id]
-  }
 
   app_settings = {
     FUNCTIONS_EXTENSION_VERSION           = "~4"
     APPINSIGHTS_INSTRUMENTATIONKEY        = azurerm_application_insights.app_insights.instrumentation_key
     APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.app_insights.connection_string
+    AZURE_STORAGE_CONNECTION_STRING = azurerm_storage_account.storage_cloudx_igazl.primary_connection_string
   }
 
   site_config {
-
+    cors {
+      # use for testing from azure portal
+      allowed_origins = ["https://portal.azure.com"]
+    }
+    application_insights_connection_string = azurerm_application_insights.app_insights.connection_string
+    application_insights_key = azurerm_application_insights.app_insights.instrumentation_key
+    always_on = true
+    application_stack {
+      java_version = "21"
+    }
   }
 }
 

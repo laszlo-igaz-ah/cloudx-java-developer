@@ -55,3 +55,10 @@ Before running any Terraform commands, you need to initialize your Terraform con
 terraform init
 ```
 
+# Extra Notes for modules
+
+## Module 6 
+
+This module contains an Azure Function and for deploying the OrderItemReserver we have to [download Publish Profile](https://learn.microsoft.com/en-us/azure/azure-functions/functions-how-to-github-actions?tabs=linux%2Cjava&pivots=method-template#download-your-publish-profile) from Azure Portal
+
+When this profile is available then we have to update the Secrets on GH Actions (the same page contains the steps).

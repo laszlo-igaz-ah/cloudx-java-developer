@@ -1,5 +1,6 @@
 package com.chtrembl.petstoreapp.service;
 
+import com.chtrembl.petstoreapp.client.FunctionClient;
 import com.chtrembl.petstoreapp.client.OrderServiceClient;
 import com.chtrembl.petstoreapp.exception.OrderServiceException;
 import com.chtrembl.petstoreapp.model.Order;
@@ -30,6 +31,7 @@ public class OrderManagementService {
 
     private final User sessionUser;
     private final OrderServiceClient orderServiceClient;
+    private final FunctionClient functionClient;
 
     public void updateOrder(long productId, int quantity, boolean completeOrder) {
         MDC.put(OPERATION, "updateOrder");
@@ -47,6 +49,10 @@ public class OrderManagementService {
             String orderJSON = serializeOrder(updatedOrder);
 
             Order resultOrder = orderServiceClient.createOrUpdateOrder(orderJSON);
+
+            orderJSON = serializeOrder(resultOrder);
+            functionClient.triggerOrderItemReserver(orderJSON);
+
             log.info("Successfully updated order: {}", resultOrder);
 
         } catch (FeignException fe) {
