@@ -84,7 +84,8 @@ resource "azurerm_linux_web_app" "app_services" {
     PETSTOREORDERSERVICE_URL           = "http://igazl-petstoreorderservice.azurewebsites.net"
     PETSTOREPETSERVICE_URL             = "http://igazl-petstorepetservice.azurewebsites.net"
     PETSTOREPRODUCTSERVICE_URL         = "http://igazl-petstoreproductservice.azurewebsites.net"
-    ORDER_ITEM_RESERVER_FUNCTION_KEY   = "none"
+    # update this with function api key from azure portal
+    ORDER_ITEM_RESERVER_FUNCTION_KEY   = "update-me-from-azure-portal-function-api-key"
   }
 
   identity {
