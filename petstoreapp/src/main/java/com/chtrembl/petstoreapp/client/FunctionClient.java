@@ -16,6 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface FunctionClient {
 
     @PostMapping("/OrderItemReserver")
-    Order triggerOrderItemReserver(@RequestBody String orderJson);
+    void triggerOrderItemReserver(@RequestBody String orderJson);
 
 }
