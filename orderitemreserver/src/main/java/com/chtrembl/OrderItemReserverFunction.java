@@ -7,6 +7,7 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +32,8 @@ public class OrderItemReserverFunction {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please pass an Order JSON in the request body").build();
         }
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = new ObjectMapper()
+                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             Order order = objectMapper.readValue(body, Order.class);
             context.getLogger().info("Received Order: " + order);
 
