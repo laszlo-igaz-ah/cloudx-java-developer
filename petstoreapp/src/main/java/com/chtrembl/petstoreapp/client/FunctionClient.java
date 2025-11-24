@@ -3,19 +3,19 @@ package com.chtrembl.petstoreapp.client;
 import com.chtrembl.petstoreapp.config.FeignConfig;
 import com.chtrembl.petstoreapp.model.Order;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 @FeignClient(
         name = "function-service",
-        url = "https://function-app-cloudx-igazl.azurewebsites.net/api",
+        url = "${petstore.function.order-item-reserver.url}",
         configuration = FeignConfig.class
 )
 public interface FunctionClient {
 
-    @PostMapping("/OrderItemReserver")
-    void triggerOrderItemReserver(@RequestBody String orderJson);
+    @PostMapping(value = "/OrderItemReserver")
+    void triggerOrderItemReserver(
+            @RequestBody String orderJson,
+            @RequestHeader("x-functions-key") String functionKey
+    );
 
 }

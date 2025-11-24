@@ -49,7 +49,7 @@ public class OrderItemReserverFunction {
                 containerClient.create();
             }
             BlobClient blobClient = containerClient.getBlobClient(blobName);
-            blobClient.upload(BinaryData.fromString(body));
+            blobClient.upload(BinaryData.fromString(body), true);
 
             context.getLogger().info("Order JSON saved to blob: " + blobName);
             return request.createResponseBuilder(HttpStatus.OK).body("Order JSON saved to blob: " + blobName).build();

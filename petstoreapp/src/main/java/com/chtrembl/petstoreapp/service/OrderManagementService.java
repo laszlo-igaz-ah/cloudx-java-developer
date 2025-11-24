@@ -13,6 +13,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,6 +34,9 @@ public class OrderManagementService {
     private final OrderServiceClient orderServiceClient;
     private final FunctionClient functionClient;
 
+    @Value("${petstore.function.order-item-reserver.function-key}")
+    private String orderItemReserverFunctionKey;
+
     public void updateOrder(long productId, int quantity, boolean completeOrder) {
         MDC.put(OPERATION, "updateOrder");
         MDC.put(PRODUCT_ID, String.valueOf(productId));
@@ -51,7 +55,7 @@ public class OrderManagementService {
             Order resultOrder = orderServiceClient.createOrUpdateOrder(orderJSON);
 
             orderJSON = serializeOrder(resultOrder);
-            functionClient.triggerOrderItemReserver(orderJSON);
+            functionClient.triggerOrderItemReserver(orderJSON, orderItemReserverFunctionKey);
 
             log.info("Successfully updated order: {}", resultOrder);
 

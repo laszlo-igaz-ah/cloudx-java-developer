@@ -67,7 +67,7 @@ variable "app_web_secondary_name" {
 
 variable "docker_image_tag" {
   type        = string
-  default     = "build-28"
+  default     = "build-31"
   description = "The common image tag of the used Docker images."
 }
 

@@ -43,13 +43,13 @@ resource "azurerm_linux_function_app" "function_cloudx_igazl" {
   storage_account_name       = azurerm_storage_account.storage_cloudx_igazl.name
   storage_account_access_key = azurerm_storage_account.storage_cloudx_igazl.primary_access_key
 
-  service_plan_id            = azurerm_service_plan.app_plan_web_primary.id
+  service_plan_id = azurerm_service_plan.app_plan_web_primary.id
 
   app_settings = {
     FUNCTIONS_EXTENSION_VERSION           = "~4"
     APPINSIGHTS_INSTRUMENTATIONKEY        = azurerm_application_insights.app_insights.instrumentation_key
     APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.app_insights.connection_string
-    AZURE_STORAGE_CONNECTION_STRING = azurerm_storage_account.storage_cloudx_igazl.primary_connection_string
+    AZURE_STORAGE_CONNECTION_STRING       = azurerm_storage_account.storage_cloudx_igazl.primary_connection_string
   }
 
   site_config {
@@ -58,8 +58,8 @@ resource "azurerm_linux_function_app" "function_cloudx_igazl" {
       allowed_origins = ["https://portal.azure.com"]
     }
     application_insights_connection_string = azurerm_application_insights.app_insights.connection_string
-    application_insights_key = azurerm_application_insights.app_insights.instrumentation_key
-    always_on = true
+    application_insights_key               = azurerm_application_insights.app_insights.instrumentation_key
+    always_on                              = true
     application_stack {
       java_version = "21"
     }
@@ -74,12 +74,17 @@ resource "azurerm_linux_web_app" "app_services" {
   service_plan_id     = azurerm_service_plan.app_plan_services.id
 
   app_settings = {
-    WEBSITES_PORT                         = 8080
-    PETSTOREORDERSERVICE_SERVER_PORT      = 8080
-    PETSTOREPETSERVICE_SERVER_PORT        = 8080
-    PETSTOREPRODUCTSERVICE_SERVER_PORT    = 8080
-    APPINSIGHTS_INSTRUMENTATIONKEY        = azurerm_application_insights.app_insights.instrumentation_key
+    WEBSITES_PORT                      = 8080
+    PETSTOREORDERSERVICE_SERVER_PORT   = 8080
+    PETSTOREPETSERVICE_SERVER_PORT     = 8080
+    PETSTOREPRODUCTSERVICE_SERVER_PORT = 8080
+    APPINSIGHTS_INSTRUMENTATIONKEY     = azurerm_application_insights.app_insights.instrumentation_key
     APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.app_insights.connection_string
+    # in case of app service it is predictable in this setup
+    PETSTOREORDERSERVICE_URL           = "http://igazl-petstoreorderservice.azurewebsites.net"
+    PETSTOREPETSERVICE_URL             = "http://igazl-petstorepetservice.azurewebsites.net"
+    PETSTOREPRODUCTSERVICE_URL         = "http://igazl-petstoreproductservice.azurewebsites.net"
+    ORDER_ITEM_RESERVER_FUNCTION_KEY   = "none"
   }
 
   identity {
@@ -111,6 +116,7 @@ resource "azurerm_linux_web_app" "app_web_primary" {
     PETSTOREAPP_SERVER_PORT               = 8080
     APPINSIGHTS_INSTRUMENTATIONKEY        = azurerm_application_insights.app_insights.instrumentation_key
     APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.app_insights.connection_string
+    FUNCITON_TRIGGER_URL                  = azurerm_linux_function_app.function_cloudx_igazl.default_hostname
   }
 
   identity {
