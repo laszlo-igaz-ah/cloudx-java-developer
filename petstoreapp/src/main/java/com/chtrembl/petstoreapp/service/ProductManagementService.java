@@ -44,10 +44,10 @@ public class ProductManagementService {
         log.info("Starting product retrieval operation [RequestID: {}, TraceID: {}, Category: {}]",
                 requestId, traceId, category);
 
-        if (Math.random() < 0.5) { // 10% chance
+        /*if (Math.random() < 0.5) { // 10% chance
             log.error("Random exception triggered [RequestID: {}, TraceID: {}]", requestId, traceId);
             throw new RuntimeException("Cannot go further");
-        }
+        }*/
 
         try {
             this.sessionUser.getTelemetryClient().trackEvent(
