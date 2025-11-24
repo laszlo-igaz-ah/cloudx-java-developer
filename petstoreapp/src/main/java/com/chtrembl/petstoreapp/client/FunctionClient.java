@@ -15,7 +15,7 @@ public interface FunctionClient {
     @PostMapping(value = "/OrderItemReserver")
     void triggerOrderItemReserver(
             @RequestBody String orderJson,
-            @RequestHeader("x-functions-key") String functionKey
+            @RequestParam("code") String functionKey
     );
 
 }
