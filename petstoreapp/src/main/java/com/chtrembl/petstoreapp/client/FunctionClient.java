@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
         name = "function-service",
-        url = "ttps://function-app-cloudx-igazl.azurewebsites.net/api",
+        url = "https://function-app-cloudx-igazl.azurewebsites.net/api",
         configuration = FeignConfig.class
 )
 public interface FunctionClient {
