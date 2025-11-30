@@ -55,3 +55,16 @@ Before running any Terraform commands, you need to initialize your Terraform con
 terraform init
 ```
 
+# Extra Notes for modules
+
+## Module 6 
+
+This module contains an Azure Function and for deploying the OrderItemReserver we have to [download Publish Profile](https://learn.microsoft.com/en-us/azure/azure-functions/functions-how-to-github-actions?tabs=linux%2Cjava&pivots=method-template#download-your-publish-profile) from Azure Portal
+
+When this profile is available then we have to update the Secrets on GH Actions (the same page contains the steps).
+
+### Call function from service
+
+Use the Azure portal to get the APP key from the Function and set it to `petstore.function.order-item-reserver.function-key`.
+
+This is used for the code parameter.

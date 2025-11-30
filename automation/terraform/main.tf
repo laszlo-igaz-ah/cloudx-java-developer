@@ -32,23 +32,6 @@ module "temporary_resources" {
   temporary_rg_name  = var.temporary_rg_name
 }
 
-module "cloudx_task_05" {
-  source = "./modules/cloudx-task-05"
-
-  app_plan_resource_group_name      = var.temporary_rg_name
-  app_plan_web_primary_location     = var.app_plan_web_primary_location
-  app_plan_web_primary_name         = var.app_plan_web_primary_name
-  app_plan_web_secondary_location   = var.app_plan_web_secondary_location
-  app_plan_web_secondary_name       = var.app_plan_web_secondary_name
-  acr_name                          = var.permanent_acr_name
-  acr_managed_identity_principal_id = module.permanent_resources.managed_identity_principal_id
-  acr_managed_identity_client_id    = module.permanent_resources.managed_identity_client_id
-  acr_managed_identity_id           = module.permanent_resources.managed_identity_id
-  docker_image_tag                  = "build-23"
-  app_plan_web_services_name        = var.app_plan_web_services_name
-  app_plan_web_services_location    = var.app_plan_web_services_location
-}
-
 /*
 Excluding the module because this task is completed
 module "cloudx_task_03" {
@@ -80,4 +63,38 @@ module "cloudx_task_04" {
   acr_managed_identity_id      = module.permanent_resources.managed_identity_id
   docker_image_tag             = "build-14"
 }
+
+module "cloudx_task_05" {
+  source = "./modules/cloudx-task-05"
+
+  app_plan_resource_group_name      = var.temporary_rg_name
+  app_plan_web_primary_location     = var.app_plan_web_primary_location
+  app_plan_web_primary_name         = var.app_plan_web_primary_name
+  app_plan_web_secondary_location   = var.app_plan_web_secondary_location
+  app_plan_web_secondary_name       = var.app_plan_web_secondary_name
+  acr_name                          = var.permanent_acr_name
+  acr_managed_identity_principal_id = module.permanent_resources.managed_identity_principal_id
+  acr_managed_identity_client_id    = module.permanent_resources.managed_identity_client_id
+  acr_managed_identity_id           = module.permanent_resources.managed_identity_id
+  docker_image_tag                  = "build-23"
+  app_plan_web_services_name        = var.app_plan_web_services_name
+  app_plan_web_services_location    = var.app_plan_web_services_location
+}
 */
+
+module "cloudx_task_06" {
+  source = "./modules/cloudx-task-06"
+
+  app_plan_resource_group_name      = var.temporary_rg_name
+  app_plan_web_primary_location     = var.app_plan_web_primary_location
+  app_plan_web_primary_name         = var.app_plan_web_primary_name
+  app_plan_web_secondary_location   = var.app_plan_web_secondary_location
+  app_plan_web_secondary_name       = var.app_plan_web_secondary_name
+  acr_name                          = var.permanent_acr_name
+  acr_managed_identity_principal_id = module.permanent_resources.managed_identity_principal_id
+  acr_managed_identity_client_id    = module.permanent_resources.managed_identity_client_id
+  acr_managed_identity_id           = module.permanent_resources.managed_identity_id
+  docker_image_tag                  = "build-36"
+  app_plan_web_services_name        = var.app_plan_web_services_name
+  app_plan_web_services_location    = var.app_plan_web_services_location
+}

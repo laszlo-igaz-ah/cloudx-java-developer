@@ -23,3 +23,9 @@ resource "azurerm_role_assignment" "role_acr_assigment_app_web_primary" {
   principal_id         = azurerm_user_assigned_identity.cloudx_managed_identity.principal_id
   scope                = azurerm_container_registry.permanent_acr.id
 }
+
+resource "azurerm_role_assignment" "role_blob_assigment_app_web_primary" {
+  role_definition_name = "Storage Blob Data Owner"
+  principal_id         = azurerm_user_assigned_identity.cloudx_managed_identity.principal_id
+  scope                = azurerm_container_registry.permanent_acr.id
+}
