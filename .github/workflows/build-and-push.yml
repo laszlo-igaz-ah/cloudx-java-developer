@@ -1,83 +1,92 @@
-on: [push, workflow_dispatch]
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      run_function:
+        description: 'Deploy Azure Function App (true/false)'
+        required: false
+        default: 'false'
+
 name: Build and Push Docker image
 
 env:
-  AZURE_FUNCTIONAPP_NAME: 'function-app-cloudx-igazl'   # set this to your function app name on Azure
-  POM_XML_DIRECTORY: './orderitemreserver'                    # set this to the directory which contains pom.xml file
-  JAVA_VERSION: '21'                         # set this to the java version to use (e.g. '8', '11', '17')
-
+  AZURE_FUNCTIONAPP_NAME: 'function-app-cloudx-igazl'
+  POM_XML_DIRECTORY: './orderitemreserver'
+  JAVA_VERSION: '21'
+  # Derive RUN_FUNCTION from workflow_dispatch input (falls back to false on push events)
+  RUN_FUNCTION: ${{ github.event.inputs.run_function || 'false' }}
 
 jobs:
-    build-and-deploy:
-        runs-on: ubuntu-latest
-        steps:
-        # checkout the repo
-        - name: 'Checkout GitHub Action'
-          uses: actions/checkout@main
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@main
 
-        - name: Setup Java Sdk ${{ env.JAVA_VERSION }}
-          uses: actions/setup-java@v3
-          with:
-            cache: maven
-            java-version: ${{ env.JAVA_VERSION }}
-            distribution: temurin
+      - name: Setup Java Sdk ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v3
+        with:
+          cache: maven
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
 
-        - name: 'Restore Project Dependencies Using Mvn'
-          shell: bash
-          run: |
-            pushd './${{ env.POM_XML_DIRECTORY }}'
-            mvn clean package
-            popd
+      - name: 'Restore Project Dependencies Using Mvn'
+        shell: bash
+        run: |
+          pushd './${{ env.POM_XML_DIRECTORY }}'
+          mvn clean package
+          popd
 
-        - name: 'Run Azure Functions Action'
-          uses: Azure/functions-action@v1
-          id: fa
-          with:
-            app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-            package: '${{ env.POM_XML_DIRECTORY }}' # if there are multiple function apps in same project, then this path will be like './${{ env.POM_XML_DIRECTORY }}/target/azure-functions/${{ env.POM_FUNCTIONAPP_NAME }'
-            publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-            respect-pom-xml: true
+      - name: 'Run Azure Functions Action'
+        if: ${{ env.RUN_FUNCTION == 'true' }}
+        uses: Azure/functions-action@v1
+        id: fa
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          package: '${{ env.POM_XML_DIRECTORY }}'
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          respect-pom-xml: true
 
-        - name: 'Login via Azure CLI'
-          uses: azure/login@v1
-          with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
-        
-        - name: 'Docker Login'
-          uses: azure/docker-login@v1
-          with:
-            login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-            username: ${{ secrets.REGISTRY_USERNAME }}
-            password: ${{ secrets.REGISTRY_PASSWORD }}
-          
-        - name: 'PetStore APP Build and push image'
-          run: |
-            pushd ./petstoreapp
-            mvn clean package
-            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreapp:build-${{ github.run_number }}
-            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreapp:build-${{ github.run_number }}
-            popd
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-        - name: 'PetStore OrderService Build and push image'
-          run: |
-            pushd ./petstoreorderservice
-            mvn clean package
-            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:build-${{ github.run_number }}
-            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:build-${{ github.run_number }}
-            popd
+      - name: 'Docker Login'
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
-        - name: 'PetStore PetService Build and push image'
-          run: |
-            pushd ./petstorepetservice
-            mvn clean package
-            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:build-${{ github.run_number }}
-            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:build-${{ github.run_number }}
-            popd
+      - name: 'PetStore APP Build and push image'
+        run: |
+          pushd ./petstoreapp
+          mvn clean package
+          docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreapp:build-${{ github.run_number }}
+          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreapp:build-${{ github.run_number }}
+          popd
 
-        - name: 'PetStore ProductService Build and push image'
-          run: |
-            pushd ./petstoreproductservice
-            mvn clean package
-            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreproductservice:build-${{ github.run_number }}
-            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreproductservice:build-${{ github.run_number }}
-            popd
+      - name: 'PetStore OrderService Build and push image'
+        run: |
+          pushd ./petstoreorderservice
+          mvn clean package
+          docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:build-${{ github.run_number }}
+          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreorderservice:build-${{ github.run_number }}
+          popd
+
+      - name: 'PetStore PetService Build and push image'
+        run: |
+          pushd ./petstorepetservice
+          mvn clean package
+          docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:build-${{ github.run_number }}
+          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstorepetservice:build-${{ github.run_number }}
+          popd
+
+      - name: 'PetStore ProductService Build and push image'
+        run: |
+          pushd ./petstoreproductservice
+          mvn clean package
+          docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreproductservice:build-${{ github.run_number }}
+          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/petstoreproductservice:build-${{ github.run_number }}
+          popd
