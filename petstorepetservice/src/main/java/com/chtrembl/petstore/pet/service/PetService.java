@@ -1,10 +1,13 @@
 package com.chtrembl.petstore.pet.service;
 
-import com.chtrembl.petstore.pet.model.DataPreload;
+import com.chtrembl.petstore.pet.entity.PetEntity;
+import com.chtrembl.petstore.pet.mapper.PetMapper;
 import com.chtrembl.petstore.pet.model.Pet;
+import com.chtrembl.petstore.pet.repository.PetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,30 +17,33 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PetService {
 
-    private final DataPreload dataPreload;
+    private final PetRepository petRepository;
 
+    @Transactional(readOnly = true)
     public List<Pet> findPetsByStatus(List<String> status) {
         log.info("Finding pets with status: {}", status);
 
-        return dataPreload.getPets().stream()
-                .filter(pet -> status.contains(pet.getStatus().getValue()))
-                .toList();
+        List<PetEntity> entities = petRepository.findByStatus(status);
+        return PetMapper.toModelList(entities);
     }
 
+    @Transactional(readOnly = true)
     public Optional<Pet> findPetById(Long petId) {
         log.info("Finding pet with id: {}", petId);
 
-        return dataPreload.getPets().stream()
-                .filter(pet -> pet.getId().equals(petId))
-                .findFirst();
+        Optional<PetEntity> entity = petRepository.findById(petId);
+        return entity.map(PetMapper::toModel);
     }
 
+    @Transactional(readOnly = true)
     public List<Pet> getAllPets() {
         log.info("Getting all pets");
-        return dataPreload.getPets();
+        List<PetEntity> entities = petRepository.findAll();
+        return PetMapper.toModelList(entities);
     }
 
+    @Transactional(readOnly = true)
     public int getPetCount() {
-        return dataPreload.getPets().size();
+        return (int) petRepository.count();
     }
 }
