@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "pet_tag")
+@Table(name = "pet_tag_connect")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

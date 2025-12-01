@@ -15,6 +15,12 @@ resource "azurerm_postgresql_flexible_server" "postgres_flexible" {
   storage_mb = 32768
 
   sku_name = "B_Standard_B2s"
+
+  lifecycle {
+    ignore_changes = [
+      zone
+    ]
+  }
 }
 
 resource "azurerm_postgresql_flexible_server_firewall_rule" "fw_rule_postgres_flexible" {
@@ -55,6 +61,16 @@ resource "azurerm_service_plan" "app_plan_web_primary" {
 }
 
 resource "azurerm_linux_web_app" "app_services" {
+  depends_on = [
+    azurerm_postgresql_flexible_server.postgres_flexible,
+    azurerm_postgresql_flexible_server_database.petstore_database,
+    azurerm_postgresql_flexible_server_firewall_rule.fw_rule_postgres_flexible
+  ]
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
   for_each            = var.services
   location            = var.app_plan_web_services_location
   name                = "igazl-${each.value}"
@@ -95,6 +111,16 @@ resource "azurerm_linux_web_app" "app_services" {
 }
 
 resource "azurerm_linux_web_app" "app_web_primary" {
+  depends_on = [
+    azurerm_postgresql_flexible_server.postgres_flexible,
+    azurerm_postgresql_flexible_server_database.petstore_database,
+    azurerm_postgresql_flexible_server_firewall_rule.fw_rule_postgres_flexible
+  ]
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
   location            = var.app_plan_web_primary_location
   name                = var.app_web_primary_name
   resource_group_name = var.app_plan_resource_group_name

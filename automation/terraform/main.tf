@@ -102,6 +102,7 @@ module "cloudx_task_06" {
 module "cloudx_task_07" {
   source = "./modules/cloudx-task-07"
 
+  depends_on = [module.temporary_resources]
   app_plan_resource_group_name      = var.temporary_rg_name
   app_plan_web_primary_location     = var.app_plan_web_primary_location
   app_plan_web_primary_name         = var.app_plan_web_primary_name
@@ -111,7 +112,7 @@ module "cloudx_task_07" {
   acr_managed_identity_principal_id = module.permanent_resources.managed_identity_principal_id
   acr_managed_identity_client_id    = module.permanent_resources.managed_identity_client_id
   acr_managed_identity_id           = module.permanent_resources.managed_identity_id
-  docker_image_tag                  = "build-36"
+  docker_image_tag                  = "build-44"
   app_plan_web_services_name        = var.app_plan_web_services_name
   app_plan_web_services_location    = var.app_plan_web_services_location
   postgres_flex                     = var.postgres_flex

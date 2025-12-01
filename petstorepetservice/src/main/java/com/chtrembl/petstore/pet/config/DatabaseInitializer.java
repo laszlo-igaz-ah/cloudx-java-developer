@@ -43,8 +43,8 @@ public class DatabaseInitializer implements CommandLineRunner {
                 String trimmedStatement = statement.trim();
                 if (!trimmedStatement.isEmpty() && !trimmedStatement.startsWith("--")) {
                     try {
+                        log.info("Executed SQL statement: {}", trimmedStatement);
                         jdbcTemplate.execute(trimmedStatement);
-                        log.debug("Executed SQL statement: {}", trimmedStatement.substring(0, Math.min(50, trimmedStatement.length())));
                     } catch (Exception e) {
                         log.warn("Error executing SQL statement: {}", e.getMessage());
                         // Continue with next statement

@@ -1,33 +1,33 @@
-create table petstoreproductservice_db.public.category
+create table product_category
 (
     id                bigserial     not null primary key,
     name              varchar(64)   not null unique
 );
 
-create table petstoreproductservice_db.public.tag
+create table product_tag
 (
     id                bigserial     not null primary key,
     name              varchar(64)   not null unique
 );
 
-create table petstoreproductservice_db.public.product
+create table product
 (
     id                bigserial     not null primary key,
     name              varchar(64)   not null unique,
     category_id       bigserial     not null,
     photoURL          varchar(255)  not null,
     status            varchar(64)   not null,
-    constraint fk_category foreign key (category_id) references category(id)
+    constraint fk_category foreign key (category_id) references product_category (id)
 );
 
-create table petstoreproductservice_db.public.product_tag
+create table product_tag_connect
 (
     product_id        bigserial     not null references product (id) on delete cascade,
-    tag_id            bigserial     not null references tag (id) on delete cascade,
-    constraint product_tag_pkey primary key (product_id, tag_id)
+    tag_id            bigserial     not null references product_tag (id) on delete cascade,
+    constraint product_tag_connect_pkey primary key (product_id, tag_id)
 );
 
-insert into petstoreproductservice_db.public.category (id, name)
+insert into product_category (id, name)
 values (1, 'Dog Toy'),
        (2, 'Dog Food'),
        (3, 'Cat Toy'),
@@ -35,11 +35,11 @@ values (1, 'Dog Toy'),
        (5, 'Fish Toy'),
        (6, 'Fish Food');
 
-insert into petstoreproductservice_db.public.tag (id, name)
+insert into product_tag (id, name)
 values (1, 'small'),
        (2, 'large');
 
-insert into petstoreproductservice_db.public.product (id, name, category_id, photoURL, status)
+insert into product (id, name, category_id, photoURL, status)
 values (1, 'Ball', 1, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/dog-toys/ball.jpg?raw=true', 'available'),
        (2, 'Ball Launcher', 1, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/dog-toys/ball-launcher.jpg?raw=true', 'available'),
        (3, 'Plush Lamb', 1, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/dog-toys/plush-lamb.jpg?raw=true', 'available'),
@@ -52,7 +52,7 @@ values (1, 'Ball', 1, 'https://raw.githubusercontent.com/chtrembl/staticcontent/
        (10, 'Mangrove Ornament', 5, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/fish-toys/mangrove.jpg?raw=true', 'available'),
        (11, 'All Sizes Fish Food', 6, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/fish-food/fish.jpg?raw=true', 'available');
 
-insert into petstoreproductservice_db.public.product_tag (product_id, tag_id)
+insert into product_tag_connect (product_id, tag_id)
 values (1, 1), (1, 2),
        (2, 2),
        (3, 1), (3, 2),

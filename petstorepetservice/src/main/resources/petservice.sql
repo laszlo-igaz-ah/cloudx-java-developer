@@ -1,45 +1,45 @@
-create table petstorepetservice_db.public.category
+create table pet_category
 (
     id                bigserial     not null primary key,
     name              varchar(64)   not null unique
 );
 
-create table petstorepetservice_db.public.tag
+create table pet_tag
 (
     id                bigserial     not null primary key,
     name              varchar(64)   not null unique
 );
 
-create table petstorepetservice_db.public.pet
+create table pet
 (
     id                bigserial     not null primary key,
     name              varchar(64)   not null unique,
     category_id       bigserial     not null,
     photoURL          varchar(255)  not null,
     status            varchar(64)   not null,
-    constraint fk_category foreign key (category_id) references category(id)
+    constraint fk_category foreign key (category_id) references pet_category (id)
 );
 
-create table petstorepetservice_db.public.pet_tag
+create table pet_tag_connect
 (
     pet_id            bigserial     not null references pet (id) on delete cascade,
-    tag_id            bigserial     not null references tag (id) on delete cascade,
+    tag_id            bigserial     not null references pet_tag (id) on delete cascade,
     constraint pet_tag_pkey primary key (pet_id, tag_id)
 );
 
-insert into petstorepetservice_db.public.category (id, name)
+insert into pet_category (id, name)
 values (1, 'Dog'),
        (2, 'Cat'),
        (3, 'Fish');
 
-insert into petstorepetservice_db.public.tag (id, name)
+insert into pet_tag (id, name)
 values (1, 'doggie'),
        (2, 'large'),
        (3, 'small'),
        (4, 'kittie'),
        (5, 'fishy');
 
-insert into petstorepetservice_db.public.pet (id, name, category_id, photoURL, status)
+insert into pet (id, name, category_id, photoURL, status)
 values (1, 'Afador', 1, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/dog-breeds/afador.jpg?raw=true', 'available'),
        (2, 'American Bulldog', 1, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/dog-breeds/american-bulldog.jpg?raw=true', 'available'),
        (3, 'Australian Retriever', 1, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/dog-breeds/australian-retriever.jpg?raw=true', 'available'),
@@ -75,7 +75,7 @@ values (1, 'Afador', 1, 'https://raw.githubusercontent.com/chtrembl/staticconten
 
        (31, 'Goldfish', 3, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/fish-breeds/goldfish.jpg?raw=true', 'available');
 
-insert into petstorepetservice_db.public.pet_tag (pet_id, tag_id)
+insert into pet_tag_connect (pet_id, tag_id)
 values
     (1, 1), (1, 2),
     (2, 1), (2, 2),

@@ -114,7 +114,7 @@ variable "postgres_flex" {
     location       = "northeurope"
     resource_group = "rg_temporary1"
     version        = "17"
-    login          = "igazl-admin"
-    password       = "ChangeMe"
+    login          = "igazladmin"
+    password       = "P3tSt0r3DB"
   }
 }
