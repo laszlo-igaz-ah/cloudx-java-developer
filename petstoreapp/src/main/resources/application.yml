@@ -8,6 +8,7 @@ petstore:
       url: ${PETSTOREORDERSERVICE_URL:http://localhost:8083}
   function:
     order-item-reserver:
+      enabled: ${ORDER_ITEM_RESERVER_FUNCTION_ENABLED:false}
       function-key: ${ORDER_ITEM_RESERVER_FUNCTION_KEY:update-me-from-azure-portal-function-api-key}
       url: https://function-app-cloudx-igazl.azurewebsites.net/api
   security:

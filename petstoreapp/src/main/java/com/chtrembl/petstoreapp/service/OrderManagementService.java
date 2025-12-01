@@ -34,6 +34,9 @@ public class OrderManagementService {
     private final OrderServiceClient orderServiceClient;
     private final FunctionClient functionClient;
 
+    @Value("${petstore.function.order-item-reserver.enabled}")
+    private boolean orderItemReserverFunctionEnabled;
+
     @Value("${petstore.function.order-item-reserver.function-key}")
     private String orderItemReserverFunctionKey;
 
@@ -55,7 +58,10 @@ public class OrderManagementService {
             Order resultOrder = orderServiceClient.createOrUpdateOrder(orderJSON);
 
             orderJSON = serializeOrder(resultOrder);
-            functionClient.triggerOrderItemReserver(orderJSON, orderItemReserverFunctionKey);
+
+            if (orderItemReserverFunctionEnabled) {
+                functionClient.triggerOrderItemReserver(orderJSON, orderItemReserverFunctionKey);
+            }
 
             log.info("Successfully updated order: {}", resultOrder);
 
