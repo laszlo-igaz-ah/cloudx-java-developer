@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Product {
-    private Long id;
+    private String id;
 
     @Valid
     private Category category;
