@@ -24,7 +24,7 @@ variable "permanent_managed_identity_name" {
 
 variable "temporary_location" {
   type        = string
-  default     = "westeurope"
+  default     = "northeurope"
   description = "Location of the temporary resources."
 }
 
@@ -40,7 +40,7 @@ Variables for CloudX Task 03
 
 variable "app_plan_web_services_location" {
   type        = string
-  default     = "eastus"
+  default     = "northeurope"
   description = "Location of the App Service Plan for Services."
 }
 
@@ -52,7 +52,7 @@ variable "app_plan_web_services_name" {
 
 variable "app_plan_web_primary_location" {
   type        = string
-  default     = "eastus"
+  default     = "northeurope"
   description = "Location of the primary App Service Plan for Web App."
 }
 
@@ -64,7 +64,7 @@ variable "app_plan_web_primary_name" {
 
 variable "app_plan_web_secondary_location" {
   type        = string
-  default     = "westeurope"
+  default     = "northeurope"
   description = "Location of the secondary App Service Plan for Web App."
 }
 
@@ -94,4 +94,27 @@ variable "container_app_name_prefix" {
   type        = string
   default     = "igazl"
   description = "Prefix for the Container App names."
+}
+
+/**
+Variables for CloudX Task 07
+ */
+variable "postgres_flex" {
+  type = object({
+    name           = string
+    resource_group = string
+    location       = string
+    version        = string
+    login          = string
+    password       = string
+  })
+  description = "Options for the Postgres Flex Server"
+  default = {
+    name           = "igazl-cloudx-postgres-flexible"
+    location       = "northeurope"
+    resource_group = "rg_temporary1"
+    version        = "17"
+    login          = "igazladmin"
+    password       = "P3tSt0r3DB"
+  }
 }
