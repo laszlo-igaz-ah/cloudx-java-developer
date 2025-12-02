@@ -75,3 +75,22 @@ az acr --help
 az acr delete --help
 az acr delete -name whatishappeninghere -g rg_permanent
 az acr delete --name whatishappeninghere -g rg_permanent
+cd /tmp/terraform/
+terraform
+terraform get --help
+terraform get -update
+terraform plan
+terraform apply
+terraform plan
+terraform apply
+terraform plan
+terraform plan -out
+terraform plan --out
+terraform plan --help
+terraform apply
+terraform plan
+terraform get
+terraform plan
+terraform apply
+terraform destroy --target=module/cloudx_task_07_02
+terraform destroy --target=module.cloudx_task_07_02
