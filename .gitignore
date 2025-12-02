@@ -1,0 +1,10 @@
+
+.idea
+
+.vscode
+
+logs
+
+.env*
+
+env*
