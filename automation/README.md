@@ -68,3 +68,7 @@ When this profile is available then we have to update the Secrets on GH Actions 
 Use the Azure portal to get the APP key from the Function and set it to `petstore.function.order-item-reserver.function-key`.
 
 This is used for the code parameter.
+
+## Module 8
+
+This module adds a new Key Vault to the project and for that we need to add `Key Vault Secrets Officer` role to `azure-cli-cloudx-igazl` Service Principal that is used by terraform.
