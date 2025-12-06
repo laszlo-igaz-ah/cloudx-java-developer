@@ -61,6 +61,7 @@ public class OrderItemReserverFunction {
      * The ServiceHub message should contain an Order JSON object
      */
     @FunctionName("OrderItemReserverServiceHub")
+    @FixedDelayRetry(maxRetryCount = 4, delayInterval = "00:00:10")
     public void eventHubTrigger(
             @ServiceBusQueueTrigger(name = "message",
                     queueName = "cloudx-igazl-orders",
