@@ -12,7 +12,7 @@ petstore:
       function-key: ${ORDER_ITEM_RESERVER_FUNCTION_KEY:update-me-from-azure-portal-function-api-key}
       url: https://function-app-cloudx-igazl.azurewebsites.net/api
   servicebus:
-    queue-name: ${SERVICEBUS_QUEUE_NAME:orders}
+    queue-name: ${SERVICEBUS_QUEUE_NAME:cloudx-igazl-orders}
   security:
     # Enable in Module 10
     enabled: ${PETSTORE_SECURITY_ENABLED:false}

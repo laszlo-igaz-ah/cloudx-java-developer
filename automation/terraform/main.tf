@@ -142,12 +142,12 @@ module "cloudx_task_09" {
   source = "./modules/cloudx-task-09"
 
   depends_on = [module.temporary_resources]
-  managed_identity_principal_id = module.permanent_resources.managed_identity_principal_id
   managed_identity_id           = module.permanent_resources.managed_identity_id
   managed_identity_client_id    = module.permanent_resources.managed_identity_client_id
+  managed_identity_principal_id = module.permanent_resources.managed_identity_principal_id
   key_vault                     = var.key_vault_defaults
   servicebus                    = var.servicebus_defaults
   postgres_flex                 = var.postgres_flex
   app_function                  = var.app_function_defaults
-  app_plan                      = var.app_plan_defaults
+  app_services                  = var.app_services_defaults
 }

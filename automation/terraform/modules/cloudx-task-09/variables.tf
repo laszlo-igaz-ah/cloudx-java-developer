@@ -1,14 +1,14 @@
 variable "key_vault" {
   type = object({
-    name                 = string
+    name = string
   })
   description = "Options for the Key Vault"
 }
 
 variable "servicebus" {
   type = object({
-    namespace_name           = string
-    queue_name = string
+    namespace_name = string
+    queue_name     = string
   })
   description = "Options for the Postgres Flex Server"
 }
@@ -35,11 +35,13 @@ variable "app_function" {
 }
 
 
-variable "app_plan" {
+variable "app_services" {
   type = object({
     resource_group_name = string
+    plan_primary_name   = string
+    plan_services_name  = string
     primary_web_name    = string
-    services_name       = string
+    primary_image_name  = string
     location            = string
     acr_name            = string
     docker_image_tag    = string

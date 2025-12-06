@@ -152,11 +152,13 @@ variable "app_function_defaults" {
   }
 }
 
-variable "app_plan_defaults" {
+variable "app_services_defaults" {
   type = object({
     resource_group_name = string
+    plan_primary_name   = string
+    plan_services_name  = string
     primary_web_name    = string
-    services_name       = string
+    primary_image_name  = string
     location            = string
     acr_name            = string
     docker_image_tag    = string
@@ -164,10 +166,12 @@ variable "app_plan_defaults" {
   description = "Options for the App Services with primary name and the required settings for all the resources"
   default = {
     resource_group_name = "rg_temporary1"
-    primary_web_name    = "app-plan-web-primary"
-    services_name       = "app-plan-services"
+    plan_primary_name   = "app-plan-web-primary"
+    plan_services_name  = "app-plan-services"
+    primary_web_name    = "igazl-petstoreapp"
+    primary_image_name  = "petstoreapp"
     location            = "northeurope"
     acr_name            = "igazlcloudxpermanentacr"
-    docker_image_tag    = "build-54"
+    docker_image_tag    = "build-58"
   }
 }

@@ -13,8 +13,8 @@ import com.microsoft.azure.functions.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Azure Functions with HTTP Trigger and EventHub Trigger.
- * This function processes orders from both HTTP requests and EventHub events.
+ * Azure Functions with HTTP Trigger and ServiceHub Trigger.
+ * This function processes orders from both HTTP requests and ServiceHub events.
  */
 public class OrderItemReserverFunction {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
@@ -57,31 +57,31 @@ public class OrderItemReserverFunction {
     }
 
     /**
-     * EventHub Trigger function that processes orders from EventHub
-     * The EventHub message should contain an Order JSON object
+     * ServiceHub Trigger function that processes orders from ServiceHub
+     * The ServiceHub message should contain an Order JSON object
      */
-    @FunctionName("OrderItemReserverEventHub")
+    @FunctionName("OrderItemReserverServiceHub")
     public void eventHubTrigger(
-            @EventHubTrigger(name = "message",
-                           eventHubName = "orders",
-                           connection = "EventHubConnectionString")
+            @ServiceBusQueueTrigger(name = "message",
+                    queueName = "cloudx-igazl-orders",
+                    connection = "SERVICE_BUS_CONNECTION_STRING")
             String message,
             final ExecutionContext context) {
-        context.getLogger().info("EventHub Trigger: Processing order event");
+        context.getLogger().info("ServiceHub Trigger: Processing order event");
 
         if (message == null || message.isEmpty()) {
-            context.getLogger().warning("EventHub Trigger: Received empty message");
+            context.getLogger().warning("ServiceHub Trigger: Received empty message");
             return;
         }
 
         try {
             Order order = OBJECT_MAPPER.readValue(message, Order.class);
-            context.getLogger().info("EventHub Trigger: Received Order: " + order);
+            context.getLogger().info("ServiceHub Trigger: Received Order: " + order);
 
             processOrder(order, message, context);
         } catch (Exception e) {
-            context.getLogger().severe("EventHub Trigger: Failed to parse Order: " + e.getMessage());
-            throw new RuntimeException("Failed to process EventHub message", e);
+            context.getLogger().severe("ServiceHub Trigger: Failed to parse Order: " + e.getMessage());
+            throw new RuntimeException("Failed to process ServiceHub message", e);
         }
     }
 
@@ -89,8 +89,8 @@ public class OrderItemReserverFunction {
      * Shared logic for processing orders
      * Deserializes the Order object and saves it to Azure Blob Storage
      *
-     * @param order The Order object to process
-     * @param body The original JSON string to save
+     * @param order   The Order object to process
+     * @param body    The original JSON string to save
      * @param context The execution context for logging
      * @return A message indicating the result of the operation
      * @throws Exception if the operation fails

@@ -46,8 +46,8 @@ resource "azurerm_postgresql_flexible_server" "postgres_flexible" {
 
 resource "azurerm_servicebus_namespace" "servicebus_namespace" {
   name                = var.servicebus.namespace_name
-  location            = var.app_plan.location
-  resource_group_name = var.app_plan.resource_group_name
+  location            = var.app_services.location
+  resource_group_name = var.app_services.resource_group_name
   sku                 = "Standard"
 }
 
@@ -76,8 +76,8 @@ data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "key_vault" {
   name                       = var.key_vault.name
-  location                   = var.app_plan.location
-  resource_group_name        = var.app_plan.resource_group_name
+  location                   = var.app_services.location
+  resource_group_name        = var.app_services.resource_group_name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   rbac_authorization_enabled = true
@@ -112,26 +112,26 @@ resource "azurerm_key_vault_secret" "postgres_password" {
  */
 resource "azurerm_application_insights" "app_insights" {
   application_type    = "java"
-  location            = var.app_plan.location
+  location            = var.app_services.location
   name                = "appinsights-igazl"
-  resource_group_name = var.app_plan.resource_group_name
+  resource_group_name = var.app_services.resource_group_name
 }
 
 /*
     Creating App Service Plans for function, the services and the primary app
  */
 resource "azurerm_service_plan" "app_plan_services" {
-  name                = var.app_plan.services_name
-  resource_group_name = var.app_plan.resource_group_name
-  location            = var.app_plan.location
+  name                = var.app_services.plan_services_name
+  resource_group_name = var.app_services.resource_group_name
+  location            = var.app_services.location
   os_type             = "Linux"
   sku_name            = "B2"
 }
 
 resource "azurerm_service_plan" "app_plan_web_primary" {
-  name                = var.app_plan.primary_web_name
-  resource_group_name = var.app_plan.resource_group_name
-  location            = var.app_plan.location
+  name                = var.app_services.plan_primary_name
+  resource_group_name = var.app_services.resource_group_name
+  location            = var.app_services.location
   os_type             = "Linux"
   sku_name            = "B2"
 }
@@ -141,16 +141,16 @@ resource "azurerm_service_plan" "app_plan_web_primary" {
  */
 resource "azurerm_storage_account" "storage_cloudx_igazl" {
   name                     = var.app_function.storage_account_name
-  resource_group_name      = var.app_plan.resource_group_name
-  location                 = var.app_plan.location
+  resource_group_name      = var.app_services.resource_group_name
+  location                 = var.app_services.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
 
 resource "azurerm_linux_function_app" "function_cloudx_igazl" {
   name                = "function-app-cloudx-igazl"
-  resource_group_name = var.app_plan.resource_group_name
-  location            = var.app_plan.location
+  resource_group_name = var.app_services.resource_group_name
+  location            = var.app_services.location
 
   storage_account_name       = azurerm_storage_account.storage_cloudx_igazl.name
   storage_account_access_key = azurerm_storage_account.storage_cloudx_igazl.primary_access_key
@@ -165,6 +165,7 @@ resource "azurerm_linux_function_app" "function_cloudx_igazl" {
 
   app_settings = {
     AzureWebJobsServiceBus                = azurerm_servicebus_namespace.servicebus_namespace.default_primary_connection_string
+    EventHubConnectionString              = azurerm_servicebus_namespace.servicebus_namespace.default_primary_connection_string
     FUNCTIONS_EXTENSION_VERSION           = "~4"
     APPINSIGHTS_INSTRUMENTATIONKEY        = azurerm_application_insights.app_insights.instrumentation_key
     APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.app_insights.connection_string
@@ -185,6 +186,12 @@ resource "azurerm_linux_function_app" "function_cloudx_igazl" {
     application_stack {
       java_version = "21"
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
   }
 }
 
@@ -208,9 +215,9 @@ resource "azurerm_linux_web_app" "app_services" {
     ]
   }
   for_each            = var.services
-  location            = var.app_plan.location
+  location            = var.app_services.location
   name                = "igazl-${each.value}"
-  resource_group_name = var.app_plan.resource_group_name
+  resource_group_name = var.app_services.resource_group_name
   service_plan_id     = azurerm_service_plan.app_plan_services.id
 
   key_vault_reference_identity_id = var.managed_identity_id
@@ -242,8 +249,8 @@ resource "azurerm_linux_web_app" "app_services" {
     container_registry_use_managed_identity       = true
     container_registry_managed_identity_client_id = var.managed_identity_client_id
     application_stack {
-      docker_image_name   = "${each.value}:${var.app_plan.docker_image_tag}"
-      docker_registry_url = "https://${var.app_plan.acr_name}.azurecr.io"
+      docker_image_name   = "${each.value}:${var.app_services.docker_image_tag}"
+      docker_registry_url = "https://${var.app_services.acr_name}.azurecr.io"
     }
   }
 }
@@ -262,9 +269,9 @@ resource "azurerm_linux_web_app" "app_web_primary" {
       tags
     ]
   }
-  location            = var.app_plan.location
-  name                = var.app_plan.primary_web_name
-  resource_group_name = var.app_plan.resource_group_name
+  location            = var.app_services.location
+  name                = var.app_services.primary_web_name
+  resource_group_name = var.app_services.resource_group_name
   service_plan_id     = azurerm_service_plan.app_plan_web_primary.id
 
   app_settings = {
@@ -278,6 +285,7 @@ resource "azurerm_linux_web_app" "app_web_primary" {
     SERVICE_BUS_CONNECTION_STRING         = azurerm_servicebus_namespace.servicebus_namespace.default_primary_connection_string
     SERVICE_BUS_NAMESPACE                 = var.servicebus.namespace_name
     SERVICE_BUS_QUEUE_NAME                = var.servicebus.queue_name
+    ORDER_ITEM_RESERVER_FUNCTION_ENABLED  = true
   }
 
   identity {
@@ -289,8 +297,8 @@ resource "azurerm_linux_web_app" "app_web_primary" {
     container_registry_use_managed_identity       = true
     container_registry_managed_identity_client_id = var.managed_identity_client_id
     application_stack {
-      docker_image_name   = "${var.app_plan.primary_web_name}:${var.app_plan.docker_image_tag}"
-      docker_registry_url = "https://${var.app_plan.acr_name}.azurecr.io"
+      docker_image_name   = "${var.app_services.primary_image_name}:${var.app_services.docker_image_tag}"
+      docker_registry_url = "https://${var.app_services.acr_name}.azurecr.io"
     }
   }
 }
