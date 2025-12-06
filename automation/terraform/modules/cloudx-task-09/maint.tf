@@ -164,6 +164,7 @@ resource "azurerm_linux_function_app" "function_cloudx_igazl" {
   }
 
   app_settings = {
+    AzureWebJobsServiceBus                = azurerm_servicebus_namespace.servicebus_namespace.default_primary_connection_string
     FUNCTIONS_EXTENSION_VERSION           = "~4"
     APPINSIGHTS_INSTRUMENTATIONKEY        = azurerm_application_insights.app_insights.instrumentation_key
     APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.app_insights.connection_string
