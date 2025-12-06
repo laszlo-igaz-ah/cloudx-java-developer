@@ -5,7 +5,7 @@ on:
       run_function:
         description: 'Deploy Azure Function App (true/false)'
         required: false
-        default: 'false'
+        default: 'true'
 
 name: Build and Push Docker image
 
@@ -13,8 +13,8 @@ env:
   AZURE_FUNCTIONAPP_NAME: 'function-app-cloudx-igazl'
   POM_XML_DIRECTORY: './orderitemreserver'
   JAVA_VERSION: '21'
-  # Derive RUN_FUNCTION from workflow_dispatch input (falls back to false on push events)
-  RUN_FUNCTION: ${{ github.event.inputs.run_function || 'false' }}
+  # Derive RUN_FUNCTION from workflow_dispatch input (falls back to true on push events)
+  RUN_FUNCTION: ${{ github.event.inputs.run_function || 'true' }}
 
 jobs:
   build-and-deploy:
