@@ -96,9 +96,28 @@ variable "container_app_name_prefix" {
   description = "Prefix for the Container App names."
 }
 
-/**
-Variables for CloudX Task 07
- */
+variable "key_vault_defaults" {
+  type = object({
+    name = string
+  })
+  description = "Options for the Key Vault"
+  default = {
+    name = "igazl-cloudx-kv"
+  }
+}
+
+variable "servicebus_defaults" {
+  type = object({
+    namespace_name = string
+    queue_name     = string
+  })
+  description = "Options for Service Bus"
+  default = {
+    namespace_name = "cloudx-igazl-servicebus"
+    queue_name     = "cloudx-igazl-orders"
+  }
+}
+
 variable "postgres_flex" {
   type = object({
     name           = string
@@ -107,6 +126,7 @@ variable "postgres_flex" {
     version        = string
     login          = string
     password       = string
+    database       = string
   })
   description = "Options for the Postgres Flex Server"
   default = {
@@ -116,5 +136,38 @@ variable "postgres_flex" {
     version        = "17"
     login          = "igazladmin"
     password       = "P3tSt0r3DB"
+    database       = "igazl-cloudx-petstore"
+  }
+}
+
+variable "app_function_defaults" {
+  type = object({
+    name                 = string
+    storage_account_name = string
+  })
+  description = "Options for the Postgres Flex Server"
+  default = {
+    name                 = "function-app-cloudx-igazl"
+    storage_account_name = "storageaccountigazl"
+  }
+}
+
+variable "app_plan_defaults" {
+  type = object({
+    resource_group_name = string
+    primary_web_name    = string
+    services_name       = string
+    location            = string
+    acr_name            = string
+    docker_image_tag    = string
+  })
+  description = "Options for the App Services with primary name and the required settings for all the resources"
+  default = {
+    resource_group_name = "rg_temporary1"
+    primary_web_name    = "app-plan-web-primary"
+    services_name       = "app-plan-services"
+    location            = "northeurope"
+    acr_name            = "igazlcloudxpermanentacr"
+    docker_image_tag    = "build-54"
   }
 }

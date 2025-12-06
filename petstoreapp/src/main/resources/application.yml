@@ -50,7 +50,10 @@ spring:
       enabled: false
     azure:
       servicebus:
-        connection-string: ${AZURE_SERVICE_BUS_CONNECTION_STRING}
+        connection-string: ${SERVICE_BUS_CONNECTION_STRING}
+        namespace: ${SERVICE_BUS_NAMESPACE}
+        entity-type: queue
+        entity-name: ${SERVICE_BUS_QUEUE_NAME}
   security:
     # Used in Module 10
     oauth2:

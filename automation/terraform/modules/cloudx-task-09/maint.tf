@@ -3,9 +3,28 @@ variable "services" {
   default = ["petstoreorderservice", "petstoreproductservice", "petstorepetservice"]
   description = "List of services to be deployed."
 }
+/*
+    Creating KeyVault for all the secrets
+ */
+resource "azurerm_key_vault_secret" "postgres_host" {
+  name         = "postgres-host"
+  value        = azurerm_postgresql_flexible_server.postgres_flexible.fqdn
+  key_vault_id = azurerm_key_vault.key_vault.id
 
-data "azurerm_client_config" "current" {}
+  depends_on = [azurerm_key_vault.key_vault]
+}
 
+resource "azurerm_role_assignment" "key_vault_secrets_user" {
+  scope                = azurerm_key_vault.key_vault.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = var.managed_identity_principal_id
+
+  depends_on = [azurerm_key_vault.key_vault]
+}
+
+/*
+    Creating Postgres Flexible and add secrets to KeyVault
+ */
 resource "azurerm_postgresql_flexible_server" "postgres_flexible" {
   name                   = var.postgres_flex.name
   resource_group_name    = var.postgres_flex.resource_group
@@ -15,13 +34,28 @@ resource "azurerm_postgresql_flexible_server" "postgres_flexible" {
   administrator_password = var.postgres_flex.password
 
   storage_mb = 32768
-  sku_name   = "B_Standard_B2s"
+
+  sku_name = "B_Standard_B2s"
 
   lifecycle {
     ignore_changes = [
       zone
     ]
   }
+}
+
+resource "azurerm_servicebus_namespace" "servicebus_namespace" {
+  name                = var.servicebus.namespace_name
+  location            = var.app_plan.location
+  resource_group_name = var.app_plan.resource_group_name
+  sku                 = "Standard"
+}
+
+resource "azurerm_servicebus_queue" "example" {
+  name         = var.servicebus.queue_name
+  namespace_id = azurerm_servicebus_namespace.servicebus_namespace.id
+
+  partitioning_enabled = false
 }
 
 resource "azurerm_postgresql_flexible_server_firewall_rule" "fw_rule_postgres_flexible" {
@@ -32,27 +66,21 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "fw_rule_postgres_fl
 }
 
 resource "azurerm_postgresql_flexible_server_database" "petstore_database" {
-  name      = "igazl-cloudx-petstore"
+  name      = var.postgres_flex.database
   server_id = azurerm_postgresql_flexible_server.postgres_flexible.id
   charset   = "UTF8"
   collation = "en_US.utf8"
 }
 
+data "azurerm_client_config" "current" {}
+
 resource "azurerm_key_vault" "key_vault" {
-  name                      = "igazl-cloudx-kv"
-  location                  = var.app_plan_web_services_location
-  resource_group_name       = var.app_plan_resource_group_name
-  tenant_id                 = data.azurerm_client_config.current.tenant_id
-  sku_name                  = "standard"
-  enable_rbac_authorization = true
-}
-
-resource "azurerm_key_vault_secret" "postgres_host" {
-  name         = "postgres-host"
-  value        = azurerm_postgresql_flexible_server.postgres_flexible.fqdn
-  key_vault_id = azurerm_key_vault.key_vault.id
-
-  depends_on = [azurerm_key_vault.key_vault]
+  name                       = var.key_vault.name
+  location                   = var.app_plan.location
+  resource_group_name        = var.app_plan.resource_group_name
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  sku_name                   = "standard"
+  rbac_authorization_enabled = true
 }
 
 resource "azurerm_key_vault_secret" "postgres_port" {
@@ -79,174 +107,190 @@ resource "azurerm_key_vault_secret" "postgres_password" {
   depends_on = [azurerm_key_vault.key_vault]
 }
 
-resource "azurerm_role_assignment" "key_vault_secrets_user" {
-  scope                = azurerm_key_vault.key_vault.id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = var.acr_managed_identity_principal_id
-
-  depends_on = [azurerm_key_vault.key_vault]
-}
-
-resource "azurerm_servicebus_namespace" "servicebus_namespace" {
-  name                = var.servicebus_namespace_name
-  location            = var.app_plan_web_services_location
-  resource_group_name = var.app_plan_resource_group_name
-  sku                 = "Standard"
-  capacity            = 1
-}
-
-resource "azurerm_servicebus_queue" "orders_queue" {
-  name                = var.servicebus_queue_name
-  namespace_id        = azurerm_servicebus_namespace.servicebus_namespace.id
-  partitioning_enabled = false
-  max_delivery_count  = 10
-}
-
-resource "azurerm_servicebus_namespace_authorization_rule" "servicebus_auth_rule" {
-  name         = "RootManageSharedAccessKey"
-  namespace_id = azurerm_servicebus_namespace.servicebus_namespace.id
-  listen       = true
-  send         = true
-  manage       = true
-}
-
-resource "azurerm_key_vault_secret" "servicebus_connection_string" {
-  name         = "servicebus-connection-string"
-  value        = azurerm_servicebus_namespace_authorization_rule.servicebus_auth_rule.primary_connection_string
-  key_vault_id = azurerm_key_vault.key_vault.id
-
-  depends_on = [azurerm_servicebus_namespace_authorization_rule.servicebus_auth_rule]
-}
-
-
-data "azurerm_application_insights" "app_insights" {
+/*
+    Creating App Insight
+ */
+resource "azurerm_application_insights" "app_insights" {
+  application_type    = "java"
+  location            = var.app_plan.location
   name                = "appinsights-igazl"
-  resource_group_name = var.app_plan_resource_group_name
+  resource_group_name = var.app_plan.resource_group_name
 }
 
-data "azurerm_storage_account" "storage_cloudx_igazl" {
-  name                = "storageaccountigazl"
-  resource_group_name = var.app_plan_resource_group_name
+/*
+    Creating App Service Plans for function, the services and the primary app
+ */
+resource "azurerm_service_plan" "app_plan_services" {
+  name                = var.app_plan.services_name
+  resource_group_name = var.app_plan.resource_group_name
+  location            = var.app_plan.location
+  os_type             = "Linux"
+  sku_name            = "B2"
 }
 
-data "azurerm_service_plan" "app_plan_services" {
-  name                = var.app_plan_web_services_name
-  resource_group_name = var.app_plan_resource_group_name
+resource "azurerm_service_plan" "app_plan_web_primary" {
+  name                = var.app_plan.primary_web_name
+  resource_group_name = var.app_plan.resource_group_name
+  location            = var.app_plan.location
+  os_type             = "Linux"
+  sku_name            = "B2"
 }
 
-data "azurerm_service_plan" "app_plan_web_primary" {
-  name                = var.app_plan_web_primary_name
-  resource_group_name = var.app_plan_resource_group_name
+/*
+        Creating function and required function
+ */
+resource "azurerm_storage_account" "storage_cloudx_igazl" {
+  name                     = var.app_function.storage_account_name
+  resource_group_name      = var.app_plan.resource_group_name
+  location                 = var.app_plan.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
 }
 
-data "azurerm_linux_function_app" "function_cloudx_igazl" {
+resource "azurerm_linux_function_app" "function_cloudx_igazl" {
   name                = "function-app-cloudx-igazl"
-  resource_group_name = var.app_plan_resource_group_name
-}
+  resource_group_name = var.app_plan.resource_group_name
+  location            = var.app_plan.location
 
-resource "azurerm_linux_function_app" "function_cloudx_igazl_updated" {
-  name                = data.azurerm_linux_function_app.function_cloudx_igazl.name
-  resource_group_name = data.azurerm_linux_function_app.function_cloudx_igazl.resource_group_name
-  location            = data.azurerm_linux_function_app.function_cloudx_igazl.location
+  storage_account_name       = azurerm_storage_account.storage_cloudx_igazl.name
+  storage_account_access_key = azurerm_storage_account.storage_cloudx_igazl.primary_access_key
 
-  storage_account_name       = data.azurerm_storage_account.storage_cloudx_igazl.name
-  storage_account_access_key = data.azurerm_storage_account.storage_cloudx_igazl.primary_access_key
+  service_plan_id = azurerm_service_plan.app_plan_web_primary.id
 
-  service_plan_id = data.azurerm_service_plan.app_plan_web_primary.id
+  connection_string {
+    name  = "cloudx-igazl-orders-connection"
+    type  = "ServiceBus"
+    value = azurerm_servicebus_namespace.servicebus_namespace.default_primary_connection_string
+  }
 
   app_settings = {
     FUNCTIONS_EXTENSION_VERSION           = "~4"
-    APPINSIGHTS_INSTRUMENTATIONKEY        = data.azurerm_application_insights.app_insights.instrumentation_key
-    APPLICATIONINSIGHTS_CONNECTION_STRING = data.azurerm_application_insights.app_insights.connection_string
-    AZURE_STORAGE_CONNECTION_STRING       = data.azurerm_storage_account.storage_cloudx_igazl.primary_connection_string
-    AZURE_SERVICE_BUS_CONNECTION_STRING   = "@Microsoft.KeyVault(SecretUri=https://${data.azurerm_key_vault.key_vault.name}.vault.azure.net/secrets/${azurerm_key_vault_secret.servicebus_connection_string.name}/)"
-    EventHubConnectionString              = "@Microsoft.KeyVault(SecretUri=https://${data.azurerm_key_vault.key_vault.name}.vault.azure.net/secrets/${azurerm_key_vault_secret.servicebus_connection_string.name}/)"
+    APPINSIGHTS_INSTRUMENTATIONKEY        = azurerm_application_insights.app_insights.instrumentation_key
+    APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.app_insights.connection_string
+    AZURE_STORAGE_CONNECTION_STRING       = azurerm_storage_account.storage_cloudx_igazl.primary_connection_string
+    SERVICE_BUS_CONNECTION_STRING         = azurerm_servicebus_namespace.servicebus_namespace.default_primary_connection_string
+    SERVICE_BUS_NAMESPACE                 = var.servicebus.namespace_name
+    SERVICE_BUS_QUEUE_NAME                = var.servicebus.queue_name
   }
 
   site_config {
     cors {
+      # use for testing from azure portal
       allowed_origins = ["https://portal.azure.com"]
     }
-    application_insights_connection_string = data.azurerm_application_insights.app_insights.connection_string
-    application_insights_key               = data.azurerm_application_insights.app_insights.instrumentation_key
+    application_insights_connection_string = azurerm_application_insights.app_insights.connection_string
+    application_insights_key               = azurerm_application_insights.app_insights.instrumentation_key
     always_on                              = true
     application_stack {
       java_version = "21"
     }
   }
-
-  depends_on = [azurerm_key_vault_secret.servicebus_connection_string]
 }
 
-data "azurerm_linux_web_app" "app_services" {
+/*
+    Creating App Services for the services
+ */
+resource "azurerm_linux_web_app" "app_services" {
+  depends_on = [
+    azurerm_postgresql_flexible_server.postgres_flexible,
+    azurerm_postgresql_flexible_server_database.petstore_database,
+    azurerm_postgresql_flexible_server_firewall_rule.fw_rule_postgres_flexible,
+    azurerm_key_vault_secret.postgres_host,
+    azurerm_key_vault_secret.postgres_port,
+    azurerm_key_vault_secret.postgres_username,
+    azurerm_key_vault_secret.postgres_password,
+    azurerm_role_assignment.key_vault_secrets_user
+  ]
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
   for_each            = var.services
+  location            = var.app_plan.location
   name                = "igazl-${each.value}"
-  resource_group_name = var.app_plan_resource_group_name
-}
+  resource_group_name = var.app_plan.resource_group_name
+  service_plan_id     = azurerm_service_plan.app_plan_services.id
 
-resource "azurerm_linux_web_app" "app_services_updated" {
-  for_each            = var.services
-  location            = var.app_plan_web_services_location
-  name                = data.azurerm_linux_web_app.app_services[each.key].name
-  resource_group_name = var.app_plan_resource_group_name
-  service_plan_id     = data.azurerm_service_plan.app_plan_services.id
+  key_vault_reference_identity_id = var.managed_identity_id
 
-  app_settings = merge(
-    data.azurerm_linux_web_app.app_services[each.key].app_settings,
-    {
-      AZURE_SERVICE_BUS_CONNECTION_STRING = "@Microsoft.KeyVault(SecretUri=https://${data.azurerm_key_vault.key_vault.name}.vault.azure.net/secrets/${azurerm_key_vault_secret.servicebus_connection_string.name}/)"
-    }
-  )
+  app_settings = {
+    WEBSITES_PORT                         = 8080
+    PETSTOREORDERSERVICE_SERVER_PORT      = 8080
+    PETSTOREPETSERVICE_SERVER_PORT        = 8080
+    PETSTOREPRODUCTSERVICE_SERVER_PORT    = 8080
+    APPINSIGHTS_INSTRUMENTATIONKEY        = azurerm_application_insights.app_insights.instrumentation_key
+    APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.app_insights.connection_string
+    PETSTOREORDERSERVICE_URL              = "http://igazl-petstoreorderservice.azurewebsites.net"
+    PETSTOREPETSERVICE_URL                = "http://igazl-petstorepetservice.azurewebsites.net"
+    PETSTOREPRODUCTSERVICE_URL            = "http://igazl-petstoreproductservice.azurewebsites.net"
+    ORDER_ITEM_RESERVER_FUNCTION_KEY      = "update-me-from-azure-portal-function-api-key"
+    POSTGRES_HOST                         = "@Microsoft.KeyVault(SecretUri=https://${azurerm_key_vault.key_vault.name}.vault.azure.net/secrets/${azurerm_key_vault_secret.postgres_host.name}/)"
+    POSTGRES_PORT                         = "@Microsoft.KeyVault(SecretUri=https://${azurerm_key_vault.key_vault.name}.vault.azure.net/secrets/${azurerm_key_vault_secret.postgres_port.name}/)"
+    POSTGRES_DATABASE                     = azurerm_postgresql_flexible_server_database.petstore_database.name
+    POSTGRES_USERNAME                     = "@Microsoft.KeyVault(SecretUri=https://${azurerm_key_vault.key_vault.name}.vault.azure.net/secrets/${azurerm_key_vault_secret.postgres_username.name}/)"
+    POSTGRES_PASSWORD                     = "@Microsoft.KeyVault(SecretUri=https://${azurerm_key_vault.key_vault.name}.vault.azure.net/secrets/${azurerm_key_vault_secret.postgres_password.name}/)"
+  }
 
   identity {
     type = "UserAssigned"
-    identity_ids = [var.acr_managed_identity_id]
+    identity_ids = [var.managed_identity_id]
   }
 
   site_config {
     container_registry_use_managed_identity       = true
-    container_registry_managed_identity_client_id = var.acr_managed_identity_client_id
+    container_registry_managed_identity_client_id = var.managed_identity_client_id
     application_stack {
-      docker_image_name   = "${each.value}:${var.docker_image_tag}"
-      docker_registry_url = "https://${var.acr_name}.azurecr.io"
+      docker_image_name   = "${each.value}:${var.app_plan.docker_image_tag}"
+      docker_registry_url = "https://${var.app_plan.acr_name}.azurecr.io"
     }
   }
-
-  depends_on = [azurerm_key_vault_secret.servicebus_connection_string]
 }
 
-data "azurerm_linux_web_app" "app_web_primary" {
-  name                = var.app_web_primary_name
-  resource_group_name = var.app_plan_resource_group_name
-}
+/*
+    Creating App Services for the primary Web App
+ */
+resource "azurerm_linux_web_app" "app_web_primary" {
+  depends_on = [
+    azurerm_postgresql_flexible_server.postgres_flexible,
+    azurerm_postgresql_flexible_server_database.petstore_database,
+    azurerm_postgresql_flexible_server_firewall_rule.fw_rule_postgres_flexible
+  ]
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+  location            = var.app_plan.location
+  name                = var.app_plan.primary_web_name
+  resource_group_name = var.app_plan.resource_group_name
+  service_plan_id     = azurerm_service_plan.app_plan_web_primary.id
 
-resource "azurerm_linux_web_app" "app_web_primary_updated" {
-  location            = var.app_plan_web_primary_location
-  name                = data.azurerm_linux_web_app.app_web_primary.name
-  resource_group_name = var.app_plan_resource_group_name
-  service_plan_id     = data.azurerm_service_plan.app_plan_web_primary.id
-
-  app_settings = merge(
-    data.azurerm_linux_web_app.app_web_primary.app_settings,
-    {
-      AZURE_SERVICE_BUS_CONNECTION_STRING = "@Microsoft.KeyVault(SecretUri=https://${data.azurerm_key_vault.key_vault.name}.vault.azure.net/secrets/${azurerm_key_vault_secret.servicebus_connection_string.name}/)"
-    }
-  )
+  app_settings = {
+    "WEBSITES_PORT"                       = 8080
+    PETSTOREORDERSERVICE_URL              = azurerm_linux_web_app.app_services["petstoreorderservice"].default_hostname
+    PETSTOREPETSERVICE_URL                = azurerm_linux_web_app.app_services["petstorepetservice"].default_hostname
+    PETSTOREPRODUCTSERVICE_URL            = azurerm_linux_web_app.app_services["petstoreproductservice"].default_hostname
+    PETSTOREAPP_SERVER_PORT               = 8080
+    APPINSIGHTS_INSTRUMENTATIONKEY        = azurerm_application_insights.app_insights.instrumentation_key
+    APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.app_insights.connection_string
+    SERVICE_BUS_CONNECTION_STRING         = azurerm_servicebus_namespace.servicebus_namespace.default_primary_connection_string
+    SERVICE_BUS_NAMESPACE                 = var.servicebus.namespace_name
+    SERVICE_BUS_QUEUE_NAME                = var.servicebus.queue_name
+  }
 
   identity {
     type = "UserAssigned"
-    identity_ids = [var.acr_managed_identity_id]
+    identity_ids = [var.managed_identity_id]
   }
 
   site_config {
     container_registry_use_managed_identity       = true
-    container_registry_managed_identity_client_id = var.acr_managed_identity_client_id
+    container_registry_managed_identity_client_id = var.managed_identity_client_id
     application_stack {
-      docker_image_name   = "${var.app_web_docker_image_name}:${var.docker_image_tag}"
-      docker_registry_url = "https://${var.acr_name}.azurecr.io"
+      docker_image_name   = "${var.app_plan.primary_web_name}:${var.app_plan.docker_image_tag}"
+      docker_registry_url = "https://${var.app_plan.acr_name}.azurecr.io"
     }
   }
-
-  depends_on = [azurerm_key_vault_secret.servicebus_connection_string]
 }
 

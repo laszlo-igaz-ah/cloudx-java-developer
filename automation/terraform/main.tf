@@ -117,7 +117,6 @@ module "cloudx_task_07" {
   postgres_flex                     = var.postgres_flex
 }
 
-/*
 Commenting out task 08 - replaced by task 09 with Service Bus integration
 module "cloudx_task_08" {
   source = "./modules/cloudx-task-08"
@@ -143,17 +142,12 @@ module "cloudx_task_09" {
   source = "./modules/cloudx-task-09"
 
   depends_on = [module.temporary_resources]
-  app_plan_resource_group_name      = var.temporary_rg_name
-  app_plan_web_primary_location     = var.app_plan_web_primary_location
-  app_plan_web_primary_name         = var.app_plan_web_primary_name
-  app_plan_web_secondary_location   = var.app_plan_web_secondary_location
-  app_plan_web_secondary_name       = var.app_plan_web_secondary_name
-  acr_name                          = var.permanent_acr_name
-  acr_managed_identity_principal_id = module.permanent_resources.managed_identity_principal_id
-  acr_managed_identity_client_id    = module.permanent_resources.managed_identity_client_id
-  acr_managed_identity_id           = module.permanent_resources.managed_identity_id
-  docker_image_tag                  = "build-48"
-  app_plan_web_services_name        = var.app_plan_web_services_name
-  app_plan_web_services_location    = var.app_plan_web_services_location
-  postgres_flex                     = var.postgres_flex
+  managed_identity_principal_id = module.permanent_resources.managed_identity_principal_id
+  managed_identity_id           = module.permanent_resources.managed_identity_id
+  managed_identity_client_id    = module.permanent_resources.managed_identity_client_id
+  key_vault                     = var.key_vault_defaults
+  servicebus                    = servicebus_defaults
+  postgres_flex                 = var.postgres_flex
+  app_function                  = var.app_function_defaults
+  app_plan                      = var.app_plan_defaults
 }
