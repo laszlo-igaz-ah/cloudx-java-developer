@@ -1,19 +1,13 @@
 spring:
   application:
     name: petstoreproductservice
-  datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DATABASE:igazl-cloudx-petstore}
-    username: ${POSTGRES_USERNAME:}
-    password: ${POSTGRES_PASSWORD:}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+  cloud:
+    azure:
+      cosmos:
+        endpoint: ${COSMOS_ENDPOINT:}
+        key: ${COSMOS_KEY:}
+        database: ${COSMOS_DATABASE:igazl-cloudx-petstore}
+        populate-query-metrics: false
 server:
   port: ${PETSTOREPRODUCTSERVICE_SERVER_PORT:8082}
 
@@ -41,7 +35,7 @@ management:
     diskspace:
       enabled: false
 
-# Static data configuration removed - now using PostgreSQL database
+# Static data configuration removed - now using Cosmos DB
 # data:
 #   products:
 #     ...

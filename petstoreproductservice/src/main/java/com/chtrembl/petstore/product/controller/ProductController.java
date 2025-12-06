@@ -69,10 +69,10 @@ public class ProductController {
                             schema = @Schema(implementation = Product.class))),
             @ApiResponse(responseCode = "404", description = "Product not found", content = @Content)
     })
-    @GetMapping("/product/{productId}")
-    public ResponseEntity<Product> getProductById(
-            @Parameter(description = "ID of product to return", required = true, example = "1")
-            @PathVariable("productId") Long productId) {
+	@GetMapping("/product/{productId}")
+	public ResponseEntity<Product> getProductById(
+			@Parameter(description = "ID of product to return", required = true, example = "1")
+			@PathVariable("productId") String productId) {
 
         log.info("Received GET request to /petstoreproductservice/v2/product/{}", productId);
 

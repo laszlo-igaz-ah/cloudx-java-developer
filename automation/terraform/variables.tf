@@ -99,22 +99,18 @@ variable "container_app_name_prefix" {
 /**
 Variables for CloudX Task 07
  */
-variable "postgres_flex" {
+variable "cosmos_db" {
   type = object({
-    name           = string
-    resource_group = string
-    location       = string
-    version        = string
-    login          = string
-    password       = string
+    name             = string
+    resource_group   = string
+    location         = string
+    consistency_level = string
   })
-  description = "Options for the Postgres Flex Server"
+  description = "Options for the Cosmos DB Account"
   default = {
-    name           = "igazl-cloudx-postgres-flexible"
-    location       = "northeurope"
-    resource_group = "rg_temporary1"
-    version        = "17"
-    login          = "igazladmin"
-    password       = "P3tSt0r3DB"
+    name             = "igazl-cloudx-cosmosdb"
+    location         = "northeurope"
+    resource_group   = "rg_temporary1"
+    consistency_level = "Session"
   }
 }

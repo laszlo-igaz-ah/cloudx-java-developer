@@ -136,3 +136,23 @@ module "cloudx_task_08" {
   app_plan_web_services_location    = var.app_plan_web_services_location
   postgres_flex                     = var.postgres_flex
 }
+*/
+
+module "cloudx_task_07_02" {
+  source = "./modules/cloudx-task-07-02"
+
+  depends_on = [module.temporary_resources]
+  app_plan_resource_group_name      = var.temporary_rg_name
+  app_plan_web_primary_location     = var.app_plan_web_primary_location
+  app_plan_web_primary_name         = var.app_plan_web_primary_name
+  app_plan_web_secondary_location   = var.app_plan_web_secondary_location
+  app_plan_web_secondary_name       = var.app_plan_web_secondary_name
+  acr_name                          = var.permanent_acr_name
+  acr_managed_identity_principal_id = module.permanent_resources.managed_identity_principal_id
+  acr_managed_identity_client_id    = module.permanent_resources.managed_identity_client_id
+  acr_managed_identity_id           = module.permanent_resources.managed_identity_id
+  docker_image_tag                  = "build-47"
+  app_plan_web_services_name        = var.app_plan_web_services_name
+  app_plan_web_services_location    = var.app_plan_web_services_location
+  cosmos_db                         = var.cosmos_db
+}

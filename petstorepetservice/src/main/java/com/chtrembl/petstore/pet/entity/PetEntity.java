@@ -1,6 +1,7 @@
 package com.chtrembl.petstore.pet.entity;
 
-import jakarta.persistence.*;
+import com.azure.spring.data.cosmos.core.mapping.Container;
+import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,32 +10,24 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "pet")
+@Container(containerName = "pets")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class PetEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @PartitionKey
+    private String id;
 
-    @Column(nullable = false, unique = true, length = 64)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity category;
 
-    @Column(nullable = false, length = 255)
     private String photoURL;
 
-    @Column(nullable = false, length = 64)
     private String status;
 
-    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<PetTagEntity> petTags = new ArrayList<>();
+    private List<TagEntity> tags = new ArrayList<>();
 }
 

@@ -37,11 +37,9 @@ public class PetMapper {
             }
         }
         
-        // Map tags from petTags relationship
-        if (entity.getPetTags() != null && !entity.getPetTags().isEmpty()) {
-            List<Tag> tags = entity.getPetTags().stream()
-                    .map(petTag -> petTag.getTag())
-                    .filter(tag -> tag != null)
+        // Map tags (now embedded directly in entity)
+        if (entity.getTags() != null && !entity.getTags().isEmpty()) {
+            List<Tag> tags = entity.getTags().stream()
                     .map(PetMapper::toTagModel)
                     .collect(Collectors.toList());
             builder.tags(tags);

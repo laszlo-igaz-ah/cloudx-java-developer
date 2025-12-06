@@ -72,7 +72,7 @@ public class PetController {
 	@GetMapping("/pet/{petId}")
 	public ResponseEntity<Pet> getPetById(
 			@Parameter(description = "ID of pet to return", required = true, example = "1")
-			@PathVariable("petId") Long petId) {
+			@PathVariable("petId") String petId) {
 
 		log.info("Received GET request to /petstorepetservice/v2/pet/{}", petId);
 

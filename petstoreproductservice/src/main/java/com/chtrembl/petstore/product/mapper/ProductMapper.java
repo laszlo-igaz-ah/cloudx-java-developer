@@ -37,11 +37,9 @@ public class ProductMapper {
             }
         }
         
-        // Map tags from productTags relationship
-        if (entity.getProductTags() != null && !entity.getProductTags().isEmpty()) {
-            List<Tag> tags = entity.getProductTags().stream()
-                    .map(productTag -> productTag.getTag())
-                    .filter(tag -> tag != null)
+        // Map tags (now embedded directly in entity)
+        if (entity.getTags() != null && !entity.getTags().isEmpty()) {
+            List<Tag> tags = entity.getTags().stream()
                     .map(ProductMapper::toTagModel)
                     .collect(Collectors.toList());
             builder.tags(tags);
