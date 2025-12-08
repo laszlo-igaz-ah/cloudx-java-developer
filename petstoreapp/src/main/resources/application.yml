@@ -11,6 +11,8 @@ petstore:
       enabled: ${ORDER_ITEM_RESERVER_FUNCTION_ENABLED:false}
       function-key: ${ORDER_ITEM_RESERVER_FUNCTION_KEY:update-me-from-azure-portal-function-api-key}
       url: https://function-app-cloudx-igazl.azurewebsites.net/api
+  servicebus:
+    queue-name: ${SERVICEBUS_QUEUE_NAME:cloudx-igazl-orders}
   security:
     # Enable in Module 10
     enabled: ${PETSTORE_SECURITY_ENABLED:false}
@@ -46,6 +48,12 @@ spring:
       enabled: false
     refresh:
       enabled: false
+    azure:
+      servicebus:
+        connection-string: ${SERVICE_BUS_CONNECTION_STRING}
+        namespace: ${SERVICE_BUS_NAMESPACE}
+        entity-type: queue
+        entity-name: ${SERVICE_BUS_QUEUE_NAME}
   security:
     # Used in Module 10
     oauth2:

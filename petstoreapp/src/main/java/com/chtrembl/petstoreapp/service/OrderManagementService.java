@@ -33,6 +33,7 @@ public class OrderManagementService {
     private final User sessionUser;
     private final OrderServiceClient orderServiceClient;
     private final FunctionClient functionClient;
+    private final ServiceBusEventSender serviceBusEventSender;
 
     @Value("${petstore.function.order-item-reserver.enabled}")
     private boolean orderItemReserverFunctionEnabled;
@@ -60,7 +61,11 @@ public class OrderManagementService {
             orderJSON = serializeOrder(resultOrder);
 
             if (orderItemReserverFunctionEnabled) {
-                functionClient.triggerOrderItemReserver(orderJSON, orderItemReserverFunctionKey);
+                // Send order event to Azure Service Bus
+                serviceBusEventSender.sendOrderEvent(orderJSON);
+
+                // HTTP function call - commented out in favor of Service Bus
+                // functionClient.triggerOrderItemReserver(orderJSON, orderItemReserverFunctionKey);
             }
 
             log.info("Successfully updated order: {}", resultOrder);
