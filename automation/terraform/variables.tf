@@ -172,6 +172,6 @@ variable "app_services_defaults" {
     primary_image_name  = "petstoreapp"
     location            = "northeurope"
     acr_name            = "igazlcloudxpermanentacr"
-    docker_image_tag    = "build-59"
+    docker_image_tag    = "build-61"
   }
 }
