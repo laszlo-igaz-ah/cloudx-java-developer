@@ -94,3 +94,21 @@ terraform plan
 terraform apply
 terraform destroy --target=module/cloudx_task_07_02
 terraform destroy --target=module.cloudx_task_07_02
+ls
+cd /tmp/terraform/
+terraform plan -out tfplan
+terraform install -upgrade
+terraform getl -upgrade
+terraform get -upgrade
+terraform get -update
+terraform plan -out tfplan
+terraform apply tfplan 
+terraform plan -out tfplan
+terraform apply tfplan 
+terraform plan -out tfplan
+terraform apply tfplan 
+terraform plan -out tfplan
+terraform apply tfplan 
+terraform plan -out tfplan
+terraform apply tfplan 
+terraform destroy --target=module.cloudx_task_10
