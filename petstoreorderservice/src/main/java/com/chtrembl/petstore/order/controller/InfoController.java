@@ -57,8 +57,7 @@ public class InfoController {
         Map<String, String> response = Map.of(
                 "service", "order service",
                 "version", containerEnvironment.getAppVersion(),
-                "container", containerEnvironment.getContainerHostName(),
-                "ordersCacheSize", String.valueOf(cacheService.getOrdersCacheSize())
+                "container", containerEnvironment.getContainerHostName()
         );
 
         return ResponseEntity.ok(response);
