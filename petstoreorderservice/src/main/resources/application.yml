@@ -1,6 +1,13 @@
 spring:
   application:
     name: petstoreorderservice
+  cloud:
+    azure:
+      cosmos:
+        database: ${COSMOS_DATABASE:igazl-cloudx-petstore-db}
+        endpoint: ${COSMOS_ENDPOINT:}
+        key: ${COSMOS_KEY:}
+
 server:
   port: ${PETSTOREORDERSERVICE_SERVER_PORT:8083}
 

@@ -118,6 +118,22 @@ variable "servicebus_defaults" {
   }
 }
 
+variable "cosmos_db" {
+  type = object({
+    name             = string
+    resource_group   = string
+    location         = string
+    consistency_level = string
+  })
+  description = "Options for the Cosmos DB Account"
+  default = {
+    name             = "igazl-cloudx-cosmosdb"
+    location         = "northeurope"
+    resource_group   = "rg_temporary1"
+    consistency_level = "Session"
+  }
+}
+
 variable "postgres_flex" {
   type = object({
     name           = string
@@ -172,6 +188,6 @@ variable "app_services_defaults" {
     primary_image_name  = "petstoreapp"
     location            = "northeurope"
     acr_name            = "igazlcloudxpermanentacr"
-    docker_image_tag    = "build-61"
+    docker_image_tag    = "build-66"
   }
 }

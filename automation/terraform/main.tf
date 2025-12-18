@@ -150,7 +150,6 @@ module "cloudx_task_09" {
   app_function                  = var.app_function_defaults
   app_services                  = var.app_services_defaults
 }
-*/
 
 module "cloudx_task_10" {
   source = "./modules/cloudx-task-10"
@@ -164,4 +163,20 @@ module "cloudx_task_10" {
   postgres_flex                 = var.postgres_flex
   app_function                  = var.app_function_defaults
   app_services                  = var.app_services_defaults
+}
+*/
+
+module "cloudx_task_final" {
+  source = "./modules/cloudx-task-final"
+
+  depends_on = [module.temporary_resources]
+  managed_identity_id           = module.permanent_resources.managed_identity_id
+  managed_identity_client_id    = module.permanent_resources.managed_identity_client_id
+  managed_identity_principal_id = module.permanent_resources.managed_identity_principal_id
+  key_vault                     = var.key_vault_defaults
+  servicebus                    = var.servicebus_defaults
+  postgres_flex                 = var.postgres_flex
+  app_function                  = var.app_function_defaults
+  app_services                  = var.app_services_defaults
+  cosmos_db                     = var.cosmos_db
 }
