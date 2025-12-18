@@ -80,3 +80,8 @@ logging:
     com.chtrembl.petstoreapp: INFO
     com.azure.monitor.opentelemetry.autoconfigure.implementation.quickpulse.QuickPulsePingSender: ERROR
     com.azure.core.http.netty.NettyAsyncHttpClient: ERROR
+
+azure:
+  entra:
+    external-id:
+      tenant-domain: ${AZURE_TENANT_DOMAIN}
